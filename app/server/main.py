@@ -1,0 +1,95 @@
+"""
+Punto de entrada principal de la aplicación FastAPI
+"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import logging
+
+from api.endpoints import ml_endpoints
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Crear aplicación FastAPI
+app = FastAPI(
+    title="Nebula",
+    description="API para análisis de datos y entrenamiento de modelos de Machine Learning",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Configurar CORS
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir routers
+app.include_router(
+    ml_endpoints.router,
+    prefix="/api",
+    tags=["Machine Learning"]
+)
+
+
+@app.get("/")
+async def root():
+    """Endpoint raíz de la API"""
+    return JSONResponse(content={
+        "message": "Bienvenido a Nebula",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
+    })
+
+
+@app.get("/health")
+async def health_check():
+    """Endpoint de health check"""
+    return JSONResponse(content={
+        "status": "healthy",
+        "service": "Nebula ML API"
+    })
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Evento de inicio de la aplicación"""
+    logger.info("=" * 60)
+    logger.info("Documentación disponible en: http://localhost:8000/docs")
+    logger.info("=" * 60)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Evento de cierre de la aplicación"""
+    logger.info("Nebula ML API cerrando...")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_level="info"
+    )

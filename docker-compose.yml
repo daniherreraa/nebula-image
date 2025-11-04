@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Backend - ML API
+  backend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: nebula-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      # Montar código para hot reload en desarrollo (mapear correctamente)
+      - ./app/server/core:/app/core
+      - ./app/server/api:/app/api
+      - ./app/server/models:/app/models
+      - ./app/server/services:/app/services
+      - ./app/server/config:/app/config
+      - ./app/server/utils:/app/utils
+      - ./app/server/main.py:/app/main.py
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - nebula-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Frontend - Next.js App
+  frontend:
+    build:
+      context: ./nebula360
+      dockerfile: Dockerfile.dev
+    container_name: nebula-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    volumes:
+      # Montar código para hot reload
+      - ./nebula360:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - nebula-network
+    restart: unless-stopped
+
+networks:
+  nebula-network:
+    driver: bridge
