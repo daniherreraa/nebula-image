@@ -1,0 +1,106 @@
+# Docker Compose Example for Nebula 360
+# This file shows how to integrate Nebula 360 frontend in a larger system
+
+version: '3.8'
+
+services:
+  # ================================
+  # Frontend - Nebula 360
+  # ================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nebula360-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Auth.js Configuration
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
+      - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+
+      # Node Environment
+      - NODE_ENV=production
+
+      # Optional: Backend API URL (for future integration)
+      - NEXT_PUBLIC_API_URL=${API_URL:-http://backend:8000}
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+    # Networks (for multi-container setup)
+    networks:
+      - nebula-network
+
+    # Optional: Depends on backend (uncomment when backend is ready)
+    # depends_on:
+    #   - backend
+    #   - database
+
+  # ================================
+  # Future Services (commented out)
+  # ================================
+
+  # Backend API (Python/FastAPI or Node.js)
+  # backend:
+  #   image: nebula360-backend:latest
+  #   container_name: nebula360-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://user:pass@database:5432/nebula360
+  #   networks:
+  #     - nebula-network
+  #   depends_on:
+  #     - database
+
+  # Database (PostgreSQL)
+  # database:
+  #   image: postgres:16-alpine
+  #   container_name: nebula360-db
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=${DB_USER:-nebula}
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-nebula123}
+  #     - POSTGRES_DB=${DB_NAME:-nebula360}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - nebula-network
+
+  # Redis (for caching/sessions)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: nebula360-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - nebula-network
+
+# ================================
+# Networks
+# ================================
+networks:
+  nebula-network:
+    driver: bridge
+    name: nebula360-network
+
+# ================================
+# Volumes
+# ================================
+volumes:
+  postgres_data:
+    name: nebula360-db-data
