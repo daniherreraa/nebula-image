@@ -122,6 +122,4 @@ docker-compose exec frontend pnpm install
 - [Documentación del Frontend](frontend/README.md)
 - [Guía de Deployment](frontend/DEPLOYMENT-QUICK-START.md)
 
-## Licencia
 
-[Especificar licencia]
