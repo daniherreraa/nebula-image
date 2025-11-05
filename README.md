@@ -1,6 +1,4 @@
-# Nebula Image - ML Image Processing Platform
-
-Plataforma completa para procesamiento de imágenes con Machine Learning, compuesta por un backend con API REST y un dashboard interactivo en Next.js.
+# Nebula
 
 ## Estructura del Proyecto
 
