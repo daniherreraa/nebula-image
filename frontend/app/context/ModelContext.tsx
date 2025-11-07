@@ -191,6 +191,10 @@ export interface ModelContextType {
   setCorrelationData: (data: CorrelationData | null) => void;
   isAnalyzingOutliers: boolean;
   setIsAnalyzingOutliers: (analyzing: boolean) => void;
+  isLoadedModel: boolean;
+  setIsLoadedModel: (loaded: boolean) => void;
+  isSavingModel: boolean;
+  setIsSavingModel: (saving: boolean) => void;
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
@@ -213,6 +217,8 @@ export function ModelProvider({ children }: { children: ReactNode }) {
   const [modelResults, setModelResults] = useState<ModelResults | null>(null);
   const [correlationData, setCorrelationData] = useState<CorrelationData | null>(null);
   const [isAnalyzingOutliers, setIsAnalyzingOutliers] = useState(false);
+  const [isLoadedModel, setIsLoadedModel] = useState(false);
+  const [isSavingModel, setIsSavingModel] = useState(false);
 
   const clearDataset = () => {
     setModelId(null);
@@ -226,6 +232,8 @@ export function ModelProvider({ children }: { children: ReactNode }) {
     setTrainingConfig(null);
     setModelResults(null);
     setCorrelationData(null);
+    setIsLoadedModel(false);
+    setIsSavingModel(false);
   };
 
   return (
@@ -258,6 +266,10 @@ export function ModelProvider({ children }: { children: ReactNode }) {
         setCorrelationData,
         isAnalyzingOutliers,
         setIsAnalyzingOutliers,
+        isLoadedModel,
+        setIsLoadedModel,
+        isSavingModel,
+        setIsSavingModel,
       }}
     >
       {children}

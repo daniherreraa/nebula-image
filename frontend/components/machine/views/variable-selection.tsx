@@ -9,6 +9,8 @@ import { ModelSelection } from "@/components/machine/model-selection";
 import { TrainingSection } from "@/components/machine/training-section";
 import { TrainingLoadingScreen } from "@/components/machine/training-loading-screen";
 import { selectFeatures, encodeCategorical, analyzeOutliers, recommendTask, prepareData, trainModel } from "@/lib/api";
+import { saveModel } from "@/lib/api/models";
+import { v4 as uuidv4 } from "uuid";
 
 const VariableSelection = () => {
   const {
@@ -24,7 +26,12 @@ const VariableSelection = () => {
     setTrainingConfig,
     setModelResults,
     isAnalyzingOutliers,
-    setIsAnalyzingOutliers
+    setIsAnalyzingOutliers,
+    correlationData,
+    modelId,
+    setModelId,
+    isSavingModel,
+    setIsSavingModel
   } = useModel();
 
   const [outcomeVariable, setOutcomeVariable] = useState<string>(trainingConfig?.outcomeVariable || "");
@@ -158,6 +165,69 @@ const VariableSelection = () => {
 
         setCurrentMessage("¡Entrenamiento completado!");
         setTrainingProgress(100);
+
+        // Step 5: Save model to database
+        try {
+          setIsSavingModel(true);
+          setCurrentMessage("Guardando modelo en base de datos...");
+
+          // Validate required data before saving
+          if (!selectedModel) {
+            console.error("❌ Cannot save model: selectedModel is null/undefined");
+            throw new Error("Cannot save model: selected model is required");
+          }
+
+          console.log("✅ Validation passed - selectedModel:", selectedModel);
+
+          const newModelId = modelId || uuidv4();
+
+          const modelData = {
+            id: newModelId,
+            user_id: undefined, // TODO: Add when auth is implemented
+            model_name: `Model ${new Date().toLocaleDateString()}`,
+            preview: {
+              filename: dataset?.filename || "unknown",
+              rows: dataset?.rows || 0,
+              columns: dataset?.columns || 0,
+              column_names: dataset?.column_names || [],
+              preview_data: dataset?.preview || [],
+              data_summary: dataset?.data_summary
+            },
+            correlation_data: correlationData,
+            variable_selection: {
+              outcome_variable: outcomeVariable,
+              predictor_variables: predictors
+            },
+            training_config: {
+              selected_model: selectedModel,
+              clean_data: cleanData,
+              iqr_k: iqrK,
+              n_neighbors: nNeighbors
+            },
+            results: {
+              r2_score: trainingResult.metrics.r2_score,
+              accuracy: trainingResult.metrics.accuracy,
+              mse: trainingResult.metrics.mse,
+              results_data: trainingResult
+            }
+          };
+
+          console.log("🔍 Frontend - Sending model data:", {
+            selectedModel,
+            training_config: modelData.training_config,
+            full_data: modelData
+          });
+
+          const savedModel = await saveModel(modelData);
+          setModelId(savedModel.id);
+
+          console.log("✅ Model saved to database:", savedModel.id);
+        } catch (saveError) {
+          console.error("❌ Error saving model to database:", saveError);
+          // Don't fail the entire training process if save fails
+        } finally {
+          setIsSavingModel(false);
+        }
 
         // Navigate to results after a brief delay
         setTimeout(() => {

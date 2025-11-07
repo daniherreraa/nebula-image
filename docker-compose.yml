@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: nebula-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-nebula_db}
+      - POSTGRES_USER=${POSTGRES_USER:-nebula_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - nebula-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
   # Backend - ML API
   backend:
     build:
@@ -14,6 +37,8 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
       - HOST=0.0.0.0
       - PORT=8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-nebula_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-nebula_db}
+      - AUTH_SECRET=${AUTH_SECRET}
     volumes:
       # Montar código para hot reload en desarrollo (mapear correctamente)
       - ./backend/server/core:/app/core
@@ -24,6 +49,8 @@ services:
       - ./backend/server/utils:/app/utils
       - ./backend/server/main.py:/app/main.py
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - postgres
     networks:
       - nebula-network
     healthcheck:
@@ -46,6 +73,10 @@ services:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
       - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXTAUTH_URL=http://localhost:3000
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
+      - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
     volumes:
       # Montar código para hot reload
       - ./frontend:/app
@@ -61,3 +92,7 @@ services:
 networks:
   nebula-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

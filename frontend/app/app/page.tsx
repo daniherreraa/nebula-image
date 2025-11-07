@@ -1,4 +1,4 @@
-import FileUploader from "@/components/machine/file-uploader";
+import ModelLoader from "@/components/machine/model-loader";
 import { auth } from "@/lib/auth";
 
 export default async function AppPage() {
@@ -6,7 +6,7 @@ export default async function AppPage() {
 
   return (
     <div className="flex items-center justify-center w-full h-full text-woodsmoke-50">
-      <FileUploader />
+      <ModelLoader />
     </div>
   );
 }
