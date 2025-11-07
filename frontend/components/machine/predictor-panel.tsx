@@ -43,7 +43,7 @@ export const PredictorPanel = ({
         onClick={() => setPredictorsPanelOpen(!predictorsPanelOpen)}
         className="flex items-center gap-3 group cursor-pointer"
       >
-        <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em] group-hover:text-portage-200 transition-colors">
+        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em] group-hover:text-portage-200 transition-colors">
           Predictor Panel
         </h3>
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
@@ -217,7 +217,7 @@ export const PredictorPanel = ({
 
             {predictors.length === 0 && (
               <div className="flex-1 flex items-center justify-center">
-                <p className="text-portage-400/50 font-space-grotesk text-sm">
+                <p className="text-portage-400/50 font-space-grotesk text-xs sm:text-sm">
                   Click &quot;Add Predictor&quot; to select predictor variables
                 </p>
               </div>

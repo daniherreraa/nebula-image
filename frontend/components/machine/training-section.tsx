@@ -32,7 +32,7 @@ export const TrainingSection = ({
   return (
     <div className="mt-8 flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
+        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
           Training Configuration
         </h3>
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
@@ -51,7 +51,7 @@ export const TrainingSection = ({
               <div className="w-1.5 h-1.5 rounded-full bg-portage-400 animate-pulse shadow-lg shadow-portage-500/50" />
               <label
                 htmlFor="outliers-switch"
-                className="text-portage-300 font-space-grotesk text-sm cursor-pointer select-none"
+                className="text-portage-300 font-space-grotesk text-xs sm:text-sm cursor-pointer select-none"
               >
                 Handle Outliers & NaNs
               </label>
@@ -152,7 +152,7 @@ export const TrainingSection = ({
               {/* Button content */}
               <div className="relative px-6 py-3 flex items-center gap-3">
                 <Play className="w-5 h-5 text-portage-400 group-hover:text-portage-300 transition-colors" />
-                <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+                <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
                   Start Training
                 </span>
               </div>

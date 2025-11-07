@@ -50,7 +50,7 @@ const Preview = () => {
         columns={dataset.columns}
       />
 
-      <div className="mt-2 flex flex-col lg:h-[44.5vh] lg:flex-row gap-4 overflow-hidden relative">
+      <div className="mt-2 flex flex-col lg:h-[46vh] lg:flex-row gap-4 overflow-hidden relative">
         <div className="w-full lg:w-[60%] flex relative">
           <TablePreview
             column_names={dataset.column_names}

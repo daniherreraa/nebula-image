@@ -22,14 +22,13 @@ const VariableSelection = () => {
     setHasCompletedTraining,
     trainingConfig,
     setTrainingConfig,
-    setModelResults
+    setModelResults,
+    isAnalyzingOutliers,
+    setIsAnalyzingOutliers
   } = useModel();
 
   const [outcomeVariable, setOutcomeVariable] = useState<string>(trainingConfig?.outcomeVariable || "");
   const [predictors, setPredictors] = useState<string[]>(trainingConfig?.predictors || []);
-
-  // Outlier analysis states
-  const [isAnalyzingOutliers, setIsAnalyzingOutliers] = useState(false);
   const [hasAnalyzedOutliers, setHasAnalyzedOutliers] = useState(false);
   const [cleanData, setCleanData] = useState(true);
   const [iqrK, setIqrK] = useState<number>(1.5);
@@ -336,7 +335,7 @@ const VariableSelection = () => {
         <div ref={trainingSectionRef}>
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
+              <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
                 Start Training
               </h3>
               <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
@@ -366,7 +365,7 @@ const VariableSelection = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-portage-300 font-space-grotesk text-base uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+                    <span className="text-portage-300 font-space-grotesk text-sm sm:text-base uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
                       Start Training
                     </span>
                   </div>

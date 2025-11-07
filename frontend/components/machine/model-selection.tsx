@@ -50,7 +50,7 @@ export const ModelSelection = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
+        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
           Model Selection
         </h3>
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
@@ -68,7 +68,7 @@ export const ModelSelection = ({
 
             <div className="relative px-5 py-3 flex items-center justify-center gap-2">
               {isLoading && <Loader2 className="w-4 h-4 animate-spin text-portage-400" />}
-              <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+              <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
                 {isLoading ? "Loading Models..." : "View Recommended Models"}
               </span>
             </div>

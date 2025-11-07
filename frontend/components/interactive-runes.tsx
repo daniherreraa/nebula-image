@@ -18,8 +18,10 @@ export function InteractiveRunes() {
   const trainingProgress = modelContext?.trainingProgress ?? 0;
   const currentView = modelContext?.currentView ?? "preview";
   const hasCompletedTraining = modelContext?.hasCompletedTraining ?? false;
+  const isAnalyzingOutliers = modelContext?.isAnalyzingOutliers ?? false;
 
   const [flash, setFlash] = useState(0);
+  const [pulseIndex, setPulseIndex] = useState(0); // For sequential pulse effect
 
   // Refs for GSAP animations
   const smallRuneRef = useRef<HTMLDivElement>(null);
@@ -195,6 +197,20 @@ export function InteractiveRunes() {
     return () => clearInterval(flashInterval);
   }, [isTraining, trainingProgress]);
 
+  // Sequential pulse effect when analyzing outliers (minor loading events)
+  useEffect(() => {
+    if (!isAnalyzingOutliers) {
+      setPulseIndex(0);
+      return;
+    }
+
+    const pulseInterval = setInterval(() => {
+      setPulseIndex(prev => (prev + 1) % 3); // Cycle through 0, 1, 2 (small, medium, large)
+    }, 250); // Fast pulse every 250ms
+
+    return () => clearInterval(pulseInterval);
+  }, [isAnalyzingOutliers]);
+
   // Color transition durante training y results
   const getRuneColor = () => {
     // If training completed, always keep illuminated state
@@ -241,6 +257,17 @@ export function InteractiveRunes() {
 
   const runeStyle = getRuneColor();
 
+  // Get pulse style for each rune during minor loading
+  const getPulseStyle = (runeIndex: number) => {
+    if (!isAnalyzingOutliers) return {};
+
+    const isPulsing = pulseIndex === runeIndex;
+    return {
+      opacity: isPulsing ? 1 : 0.4,
+      transition: 'opacity 0.2s ease-in-out',
+    };
+  };
+
   return (
     <>
       {/* Constellation Background Layer - Behind everything */}
@@ -248,10 +275,10 @@ export function InteractiveRunes() {
 
       {/* Runa pequeña (scale 1) - gira en sentido horario */}
       <div
-        className={`absolute w-[20em] sm:w-[30em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none transition-all duration-500 ${
+        className={`absolute w-[30em] sm:w-[35em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none transition-all duration-500 ${
           isDragging && isUploadPage ? "rune-glow" : ""
         }`}
-        style={runeStyle}
+        style={{...runeStyle, ...getPulseStyle(0)}}
       >
         <div ref={smallRuneRef}>
           <Image
@@ -265,14 +292,14 @@ export function InteractiveRunes() {
 
       {/* Runa mediana (scale 1.7) - gira en sentido antihorario */}
       <div
-        className="absolute w-[20em] sm:w-[30em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
-        style={runeStyle}
+        className="absolute w-[30em] sm:w-[35em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
+        style={{...runeStyle, ...getPulseStyle(1)}}
       >
         <div ref={mediumRuneRef}>
           <Image
             src={runespath}
             alt="Runes Background"
-            className="w-full h-auto object-cover scale-[1.5] sm:scale-[1.6] lg:scale-[1.7]"
+            className="w-full h-auto object-cover scale-[1.6] sm:scale-[1.65] lg:scale-[1.7]"
             priority={true}
           />
         </div>
@@ -280,14 +307,14 @@ export function InteractiveRunes() {
 
       {/* Runa grande (scale 3) - gira en sentido horario */}
       <div
-        className="absolute w-[20em] sm:w-[30em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
-        style={runeStyle}
+        className="absolute w-[30em] sm:w-[35em] lg:w-[40em] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
+        style={{...runeStyle, ...getPulseStyle(2)}}
       >
         <div ref={largeRuneRef}>
           <Image
             src={runespath}
             alt="Runes Background"
-            className="w-full h-auto object-cover scale-[2.2] sm:scale-[2.6] lg:scale-[3]"
+            className="w-full h-auto object-cover scale-[2.4] sm:scale-[2.7] lg:scale-[3]"
             priority={true}
           />
         </div>

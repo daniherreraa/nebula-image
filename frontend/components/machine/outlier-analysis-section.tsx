@@ -34,7 +34,7 @@ export const OutlierAnalysisSection = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
+        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
           Outlier Analysis
         </h3>
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
@@ -53,7 +53,7 @@ export const OutlierAnalysisSection = ({
               <div className="w-1.5 h-1.5 rounded-full bg-portage-400 animate-pulse shadow-lg shadow-portage-500/50" />
               <label
                 htmlFor="clean-data-switch"
-                className="text-portage-300 font-space-grotesk text-sm cursor-pointer select-none"
+                className="text-portage-300 font-space-grotesk text-xs sm:text-sm cursor-pointer select-none"
               >
                 Clean Data (KNN Imputation)
               </label>
@@ -140,7 +140,7 @@ export const OutlierAnalysisSection = ({
             <button
               onClick={onAnalyze}
               disabled={isAnalyzing}
-              className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed h-10"
             >
               {/* Hextech corners */}
               <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -152,13 +152,13 @@ export const OutlierAnalysisSection = ({
               <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               {/* Button content */}
-              <div className="relative px-6 py-3 flex items-center gap-3">
+              <div className="relative px-6 h-full flex items-center justify-center gap-3">
                 {isAnalyzing ? (
-                  <Loader2 className="w-5 h-5 text-portage-400 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-portage-400 animate-spin" />
                 ) : (
-                  <Zap className="w-5 h-5 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                  <Zap className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
                 )}
-                <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+                <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
                   {isAnalyzing ? "Analyzing..." : "Analyze Outliers"}
                 </span>
               </div>
