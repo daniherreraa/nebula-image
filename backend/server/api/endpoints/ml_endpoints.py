@@ -573,6 +573,7 @@ async def train_ml_model(request: TrainModelRequest):
             model_type=results["training_info"]["model_type"],
             metrics=results["metrics"],
             training_info=results["training_info"],
+            predictions=results.get("predictions", []),
             feature_importance=results.get("metrics", {}).get("feature_importance")
         )
 

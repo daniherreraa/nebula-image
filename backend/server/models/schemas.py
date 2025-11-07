@@ -126,6 +126,7 @@ class TrainModelResponse(BaseModel):
     model_type: str
     metrics: Dict[str, Any]
     training_info: Dict[str, Any]
+    predictions: Optional[list] = None
     feature_importance: Optional[Dict[str, float]] = None
 
 

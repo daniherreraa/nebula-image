@@ -1,2 +1,30 @@
 .claude
 .gitignore
+
+# Carpeta personal de desarrollo
+nebula360/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/.DS_Store
+frontend/*.log
+
+# Backend (Python)
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/.venv/
+backend/venv/
+
+# Docker
+.dockerignore

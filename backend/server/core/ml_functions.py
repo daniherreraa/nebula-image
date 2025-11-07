@@ -565,23 +565,38 @@ def clean_and_impute(
 # 4. HANDLE CATEGORICAL FEATURES
 def handle_categorical_features(df: pl.DataFrame, features: list[str]) -> tuple[pl.DataFrame, dict]:
     """
-    Codifica variables categóricas usando mapeo numérico eficiente en Polars.
-    Retorna el DataFrame transformado y los diccionarios de codificación.
+    Codifica variables categóricas de forma ULTRA robusta:
+    1. Normaliza strings (strip, lowercase)
+    2. Imputa nulls con moda
+    3. Mapea texto → números
+    4. Convierte a Int64 con default=-1 para valores no mapeados
     """
     df_proc = df.clone()
     encoders = {}
 
     for col in features:
         if str(df[col].dtype) in ["Utf8", "String", "Categorical"]:
-            # Obtener valores únicos (sin nulos)
-            uniques = df[col].drop_nulls().unique().to_list()
+            # 1. Normalizar strings: quitar espacios y convertir a lowercase
+            df_proc = df_proc.with_columns(
+                pl.col(col).str.strip_chars().str.to_lowercase().alias(col)
+            )
+            
+            # 2. Imputar nulls con moda
+            mode_values = df_proc[col].mode().to_list()
+            if len(mode_values) > 0:
+                df_proc = df_proc.with_columns(
+                    pl.col(col).fill_null(mode_values[0]).alias(col)
+                )
+            
+            # 3. Obtener valores únicos (después de normalizar e imputar)
+            uniques = df_proc[col].unique().to_list()
 
-            # Crear mapeo de texto → número
+            # 4. Crear mapeo texto → número
             mapping = {val: i for i, val in enumerate(uniques)}
 
-            # Aplicar mapeo directamente (más rápido que map_elements)
+            # 5. Aplicar replace con default=-1 y strict=False
             df_proc = df_proc.with_columns(
-                pl.col(col).replace(mapping).alias(col)
+                pl.col(col).replace(mapping, default=-1).cast(pl.Int64, strict=False).alias(col)
             )
 
             encoders[col] = mapping
@@ -746,19 +761,84 @@ def check_classification_or_regression(df: pl.DataFrame, label_column: str):
 
 # 6. PREPARE DATA FOR ML
 def prepare_data_for_ml(df: pl.DataFrame, features: list, label: str):
-
+    """
+    Prepara datos para ML de forma robusta:
+    - Ya NO hace drop_nulls agresivo
+    - Imputa con estrategia apropiada por tipo
+    - Garantiza todo numérico para sklearn
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
-        # Seleccionar solo las columnas necesarias (más eficiente con Polars)
+        # Seleccionar solo las columnas necesarias
         selected_data = df.select(features + [label])
+        logger.info(f"Filas iniciales: {len(selected_data)}")
+        
+        # 1. Eliminar solo filas donde el LABEL es null
+        selected_data = selected_data.filter(pl.col(label).is_not_null())
+        logger.info(f"Filas después de filtrar label nulls: {len(selected_data)}")
+        
+        if len(selected_data) == 0:
+            raise Exception(f"Todas las filas tienen null en la columna label '{label}'")
+        
+        # 2. Procesar cada feature
+        for col in features:
+            dtype = str(selected_data[col].dtype)
+            nulls_before = selected_data[col].null_count()
+            
+            # Si es numérica
+            if dtype.startswith(("Int", "UInt", "Float")):
+                # Imputar con mediana, si falla usar 0
+                median_val = selected_data[col].median()
+                fill_val = median_val if median_val is not None else 0
+                selected_data = selected_data.with_columns(
+                    pl.col(col).fill_null(fill_val).alias(col)
+                )
+            
+            # Si es categórica (String)
+            elif dtype in ["Utf8", "String", "Categorical"]:
+                # Imputar nulls con moda, si falla usar "Unknown"
+                mode_values = selected_data[col].mode().to_list()
+                fill_val = mode_values[0] if len(mode_values) > 0 else "Unknown"
+                selected_data = selected_data.with_columns(
+                    pl.col(col).fill_null(fill_val).alias(col)
+                )
+                
+                # Codificar: crear mapping COMPLETO incluyendo todos los valores
+                uniques = selected_data[col].unique().to_list()
+                mapping = {val: i for i, val in enumerate(uniques)}
+                
+                # Aplicar replace con default para valores no mapeados
+                selected_data = selected_data.with_columns(
+                    pl.col(col).replace(mapping, default=-1).cast(pl.Int64, strict=False).alias(col)
+                )
+            
+            nulls_after = selected_data[col].null_count()
+            logger.info(f"Columna '{col}' ({dtype}): {nulls_before} nulls → {nulls_after} nulls")
+        
+        # 3. Manejar label si es categórico
+        label_dtype = str(selected_data[label].dtype)
+        if label_dtype in ["Utf8", "String", "Categorical"]:
+            uniques = selected_data[label].unique().to_list()
+            mapping = {val: i for i, val in enumerate(uniques)}
+            selected_data = selected_data.with_columns(
+                pl.col(label).replace(mapping, default=-1).cast(pl.Int64, strict=False).alias(label)
+            )
+        
+        # 4. Verificar que no queden nulls
+        total_nulls = selected_data.null_count().sum_horizontal()[0]
+        logger.info(f"Total nulls restantes: {total_nulls}")
+        logger.info(f"Filas finales: {len(selected_data)}")
+        
+        if len(selected_data) == 0:
+            raise Exception("Dataset quedó vacío después del procesamiento")
+        
+        # 5. Separar features y target
+        X = selected_data.select(features).to_numpy()
+        y = selected_data.select(label).to_numpy().ravel()
 
-        # Eliminar filas con valores nulos
-        clean_data = selected_data.drop_nulls()
-
-        # Separar features y target
-        X = clean_data.select(features).to_numpy()
-        y = clean_data.select(label).to_numpy().ravel()
-
-        return X, y, clean_data
+        return X, y, selected_data
 
     except Exception as e:
         raise Exception(f"Error al preparar los datos: {str(e)}")
@@ -1146,10 +1226,18 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             "categorical_encoders": categorical_encoders if categorical_encoders else None,
         }
 
+        # Preparar datos de predicciones para visualización (limitar a 100 puntos para performance)
+        max_points = min(100, len(y_test))
+        predictions_data = [
+            {"actual": float(y_test[i]), "predicted": float(y_pred[i])}
+            for i in range(max_points)
+        ]
+
         return {
             "success": True,
             "metrics": metrics,
             "training_info": training_info,
+            "predictions": predictions_data,
             "model": model,
             "scaler": scaler,
             "message": f"Modelo {model_type} entrenado exitosamente",

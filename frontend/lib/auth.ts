@@ -24,4 +24,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
   },
+  events: {
+    async signOut() {
+      // Clear any server-side session data
+      console.log("User signed out");
+    },
+  },
 });
