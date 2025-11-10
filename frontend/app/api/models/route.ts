@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { safeAuth } from '@/lib/auth';
 import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../lib/user-helper';
 
@@ -20,7 +20,7 @@ if (!AUTH_SECRET) {
 export async function GET(request: NextRequest) {
   try {
     // Get the authenticated session
-    const session = await auth();
+    const session = await safeAuth();
 
     if (!session?.user) {
       return NextResponse.json(
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get the authenticated session
-    const session = await auth();
+    const session = await safeAuth();
 
     if (!session?.user) {
       return NextResponse.json(

@@ -1,11 +1,11 @@
 import { InteractiveRunes } from "@/components/interactive-runes";
 import SignIn from "@/components/auth/signin-button";
 import { Sparkles } from "lucide-react";
-import { auth } from "@/lib/auth";
+import { safeAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function LoginPage() {
-  const session = await auth();
+  const session = await safeAuth();
 
   // If already logged in, redirect to app
   if (session?.user) {

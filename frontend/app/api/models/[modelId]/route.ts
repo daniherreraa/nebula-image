@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { safeAuth } from '@/lib/auth';
 import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../../lib/user-helper';
 
@@ -22,7 +22,7 @@ export async function GET(
 ) {
   try {
     // Get the authenticated session
-    const session = await auth();
+    const session = await safeAuth();
 
     if (!session?.user) {
       return NextResponse.json(
@@ -80,7 +80,7 @@ export async function DELETE(
 ) {
   try {
     // Get the authenticated session
-    const session = await auth();
+    const session = await safeAuth();
 
     if (!session?.user) {
       return NextResponse.json(

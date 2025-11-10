@@ -1,9 +1,16 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
+const AUTH_SECRET = process.env.AUTH_SECRET;
+
+if (!AUTH_SECRET) {
+  throw new Error("AUTH_SECRET is not defined. Set it in your environment.");
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true, // Required for production/Docker
-  debug: process.env.NODE_ENV === 'development', // Enable debug logs
+  debug: process.env.NODE_ENV === "development", // Enable debug logs
+  secret: AUTH_SECRET,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -12,16 +19,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         params: {
           prompt: "consent",
           access_type: "offline",
-          response_type: "code"
-        }
-      }
+          response_type: "code",
+        },
+      },
     }),
   ],
   pages: {
     signIn: "/auth/login",
   },
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user }) {
       // Add user id to token when user first signs in
       if (user) {
         token.id = user.id || user.email;
@@ -53,3 +60,44 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+const isJWTSessionError = (error: unknown): boolean => {
+  if (!error) {
+    return false;
+  }
+
+  if (error instanceof Error) {
+    if (error.name === "JWTSessionError") {
+      return true;
+    }
+    if (typeof error.message === "string" && error.message.includes("JWTSessionError")) {
+      return true;
+    }
+  }
+
+  if (typeof error === "object") {
+    const err = error as Record<string, unknown>;
+    const name = err.name ?? err.code ?? err.type;
+    if (name === "JWTSessionError") {
+      return true;
+    }
+    const message = err.message;
+    if (typeof message === "string" && message.includes("JWTSessionError")) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export async function safeAuth() {
+  try {
+    return await auth();
+  } catch (error) {
+    if (isJWTSessionError(error)) {
+      console.warn("[auth] Invalid or expired session token – treating request as unauthenticated.");
+      return null;
+    }
+    throw error;
+  }
+}

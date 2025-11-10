@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { auth, signOut } from "@/lib/auth";
+import { safeAuth, signOut } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
 const UserAvatar = async () => {
-  const session = await auth();
+  const session = await safeAuth();
 
   if (!session?.user) return null;
 
