@@ -1,10 +1,11 @@
 /**
  * API client for ML Models endpoints
+ *
+ * Uses Next.js API routes as a proxy to handle authentication properly.
+ * The API routes will forward requests to the FastAPI backend with the correct auth headers.
  */
 
-const API_BASE_URL = typeof window !== 'undefined'
-  ? 'http://localhost:8000'
-  : process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
+const API_BASE_URL = '/'; // Use Next.js API routes as proxy
 
 export interface MLModelCreate {
   id: string;
@@ -65,12 +66,11 @@ export async function saveModel(model: MLModelCreate): Promise<MLModelResponse> 
     const jsonBody = JSON.stringify(model);
     console.log("🚀 saveModel - JSON body:", jsonBody.substring(0, 500));
 
-    const response = await fetch(`${API_BASE_URL}/api/models`, {
+    const response = await fetch(`${API_BASE_URL}api/models`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include', // Send cookies for authentication
       body: jsonBody,
     });
 
@@ -91,13 +91,8 @@ export async function saveModel(model: MLModelCreate): Promise<MLModelResponse> 
  */
 export async function listModels(userId?: string): Promise<MLModelListItem[]> {
   try {
-    const url = new URL(`${API_BASE_URL}/api/models`);
-    // Note: userId parameter is ignored by backend for security
-    // Backend always uses authenticated user from cookies
-
-    const response = await fetch(url.toString(), {
-      credentials: 'include', // Send cookies for authentication
-    });
+    // Note: userId parameter is ignored - server determines user from session
+    const response = await fetch(`${API_BASE_URL}api/models`);
 
     if (!response.ok) {
       const error = await response.json();
@@ -116,9 +111,7 @@ export async function listModels(userId?: string): Promise<MLModelListItem[]> {
  */
 export async function getModel(modelId: string): Promise<MLModelResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/models/${modelId}`, {
-      credentials: 'include', // Send cookies for authentication
-    });
+    const response = await fetch(`${API_BASE_URL}api/models/${modelId}`);
 
     if (!response.ok) {
       const error = await response.json();
@@ -137,9 +130,8 @@ export async function getModel(modelId: string): Promise<MLModelResponse> {
  */
 export async function deleteModel(modelId: string): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/models/${modelId}`, {
+    const response = await fetch(`${API_BASE_URL}api/models/${modelId}`, {
       method: 'DELETE',
-      credentials: 'include', // Send cookies for authentication
     });
 
     if (!response.ok && response.status !== 204) {
@@ -157,9 +149,13 @@ export async function deleteModel(modelId: string): Promise<void> {
  */
 export async function downloadModel(modelId: string): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/download-model/${modelId}`, {
-      credentials: 'include', // Send cookies for authentication
-    });
+    // Note: This still uses the backend directly for file downloads
+    // You may need to create a proxy route for this as well if needed
+    const backendUrl = typeof window !== 'undefined'
+      ? 'http://localhost:8000'
+      : process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
+
+    const response = await fetch(`${backendUrl}/api/download-model/${modelId}`);
 
     if (!response.ok) {
       const error = await response.json();

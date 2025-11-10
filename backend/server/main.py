@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
 
-from api.endpoints import ml_endpoints, models_endpoints
+from api.endpoints import ml_endpoints, models_endpoints, users_endpoints
 from config.database import db
 
 # Configurar logging
@@ -54,6 +54,12 @@ app.include_router(
     models_endpoints.router,
     prefix="/api",
     tags=["Models"]
+)
+
+app.include_router(
+    users_endpoints.router,
+    prefix="/api",
+    tags=["Users"]
 )
 
 

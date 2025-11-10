@@ -14,10 +14,10 @@ class Database:
 
     def __init__(self):
         self.pool: Optional[asyncpg.Pool] = None
-        self.database_url = os.getenv(
-            "DATABASE_URL",
-            "postgresql://nebula_user:nebula_password_dev@postgres:5432/nebula_db"
-        )
+        self.database_url = os.getenv("DATABASE_URL")
+
+        if not self.database_url:
+            raise RuntimeError("DATABASE_URL environment variable is not set")
 
     async def connect(self):
         """Create database connection pool"""

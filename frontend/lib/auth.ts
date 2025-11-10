@@ -21,6 +21,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/login",
   },
   callbacks: {
+    async jwt({ token, user, account, profile }) {
+      // Add user id to token when user first signs in
+      if (user) {
+        token.id = user.id || user.email;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Add user id to session from token
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnApp = nextUrl.pathname.startsWith("/app");

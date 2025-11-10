@@ -10,7 +10,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Auth.js uses this secret to sign JWTs
-AUTH_SECRET = os.getenv("AUTH_SECRET", "OZ83rDA34d9RFwCS5GtOoR5bt3LaiwClIT3a1tYCGCY=")
+AUTH_SECRET = os.getenv("AUTH_SECRET")
+
+if not AUTH_SECRET:
+    raise RuntimeError("AUTH_SECRET environment variable is not set")
 
 
 async def get_current_user_id(
