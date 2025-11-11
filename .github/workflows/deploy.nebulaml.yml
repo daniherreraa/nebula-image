@@ -1,4 +1,4 @@
-name: Deploy Nebula to Azure
+name: Deploy Nebula Containers
 
 on:
   push:
@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure Web App for Containers
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'NebulaML'
-          slot-name: 'production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
+          images: |
+            nebulacanadaacr.azurecr.io/nebula-image-frontend:v2
+            nebulacanadaacr.azurecr.io/nebula-image-backend:v2
