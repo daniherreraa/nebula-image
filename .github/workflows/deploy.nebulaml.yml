@@ -1,24 +1,29 @@
-name: Deploy Nebula Containers
+name: Deploy Nebula to Azure
 
 on:
   push:
     branches:
-      - main
+      - main  # Cada vez que hagas push a main, se actualiza en Azure
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Login to Azure
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy to Azure Web App for Containers
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'NebulaML'
+          app-name: 'NebulaML'  # nombre exacto de tu App Service
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: |
-            nebulacanadaacr.azurecr.io/nebula-image-frontend:v2
-            nebulacanadaacr.azurecr.io/nebula-image-backend:v2
+            nebulacanadaacr.azurecr.io/nebula-image-frontend:latest
+            nebulacanadaacr.azurecr.io/nebula-image-backend:latest
