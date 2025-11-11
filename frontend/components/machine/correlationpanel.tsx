@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModel } from "@/app/context";
 
@@ -72,7 +72,7 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
   };
 
   const CorrelationList = ({ method }: { method: string }) => {
-    const topCorrelations = getMethodCorrelations(method);
+    const topCorrelations = useMemo(() => getMethodCorrelations(method), [method, correlationData]);
 
     if (isLoading) {
       return (

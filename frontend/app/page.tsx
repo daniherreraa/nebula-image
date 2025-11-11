@@ -1,10 +1,10 @@
 import Link from "next/link";
 import SignIn from "@/components/auth/signin-button";
-import { auth } from "@/lib/auth";
+import { safeAuth } from "@/lib/auth";
 import Hero from "@/components/landing/hero";
 
 export default async function Home() {
-  const session = await auth();
+  const session = await safeAuth();
 
   return (
     <div className="">

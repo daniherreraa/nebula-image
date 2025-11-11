@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, BarChart3, Brain, FileText } from "lucide-react";
 import { useState } from "react";
+import { useModel } from "@/app/context";
 
 const steps = [
   { id: "preview", label: "Preview", icon: Eye },
@@ -22,6 +23,7 @@ export default function FloatingStepNav({
 }: FloatingStepNavProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [leaving, setLeaving] = useState<string | null>(null);
+  const { modelResults } = useModel();
 
   return (
     <div className="fixed md:absolute bottom-0 left-0 right-0 md:right-auto w-full md:w-auto flex justify-center md:justify-start pb-safe z-50 md:z-auto">
@@ -60,44 +62,52 @@ export default function FloatingStepNav({
           const currentIndex = steps.findIndex(s => s.id === currentStep);
           const isNextStep = index === currentIndex + 1;
 
+          // Verificar si este paso debe estar deshabilitado
+          const isDisabled = step.id === "results" && !modelResults;
+
           return (
             <motion.button
               key={step.id}
-              onClick={() => onStepChange(step.id)}
+              onClick={() => !isDisabled && onStepChange(step.id)}
               onMouseEnter={() => {
-                setLeaving(null);
-                setHovered(step.id);
+                if (!isDisabled) {
+                  setLeaving(null);
+                  setHovered(step.id);
+                }
               }}
               onMouseLeave={() => {
                 setHovered(null);
                 setLeaving(step.id);
               }}
-              whileTap={{ scale: 0.95 }}
-              animate={isNextStep ? {
+              whileTap={!isDisabled ? { scale: 0.95 } : {}}
+              animate={isNextStep && !isDisabled ? {
                 boxShadow: [
                   '0 0 0 0 rgba(96, 123, 244, 0.4)',
                   '0 0 0 8px rgba(96, 123, 244, 0)',
                   '0 0 0 0 rgba(96, 123, 244, 0)'
                 ]
               } : {}}
-              transition={isNextStep ? {
+              transition={isNextStep && !isDisabled ? {
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut"
               } : {}}
+              disabled={isDisabled}
               className={`
                 relative flex items-center gap-2
-                transition-all cursor-pointer rounded-full px-2.5 md:px-3 py-2
+                transition-all rounded-full px-2.5 md:px-3 py-2
                 ${
-                  isNextStep
-                    ? "bg-portage-400 text-woodsmoke-950"
+                  isDisabled
+                    ? "bg-woodsmoke-900/30 text-portage-500/30 cursor-not-allowed opacity-50"
+                    : isNextStep
+                    ? "bg-portage-400 text-woodsmoke-950 cursor-pointer"
                     : isActive
                     ? step.id === "preview"
-                      ? "bg-portage-100 md:bg-portage-100 text-[#1C1C1C]"
-                      : "bg-[#EDEEE5] md:bg-[#EDEEE5] text-[#1C1C1C]"
+                      ? "bg-portage-100 md:bg-portage-100 text-[#1C1C1C] cursor-pointer"
+                      : "bg-[#EDEEE5] md:bg-[#EDEEE5] text-[#1C1C1C] cursor-pointer"
                     : step.id === "preview"
-                      ? "text-portage-200 md:text-[#5E5E4B] hover:bg-portage-500/20 md:hover:bg-portage-100 hover:text-portage-100 md:hover:text-[#1C1C1C]"
-                      : "text-portage-200 md:text-[#5E5E4B] hover:bg-woodsmoke-800/50 md:hover:bg-[#F3F3ED]"
+                      ? "text-portage-200 md:text-[#5E5E4B] hover:bg-portage-500/20 md:hover:bg-portage-100 hover:text-portage-100 md:hover:text-[#1C1C1C] cursor-pointer"
+                      : "text-portage-200 md:text-[#5E5E4B] hover:bg-woodsmoke-800/50 md:hover:bg-[#F3F3ED] cursor-pointer"
                 }
               `}
             >
@@ -118,7 +128,9 @@ export default function FloatingStepNav({
                   <div className="h-5 w-5 flex items-center justify-center absolute top-0">
                     <Icon
                       className={`w-4 h-4 md:w-5 md:h-5 ${
-                        isNextStep
+                        isDisabled
+                          ? "text-portage-500/30"
+                          : isNextStep
                           ? "text-woodsmoke-950"
                           : highlightPreview
                           ? "text-[#1C1C1C]"
@@ -131,7 +143,9 @@ export default function FloatingStepNav({
                   <div className="h-5 w-5 flex items-center justify-center absolute top-5">
                     <Icon
                       className={`w-4 h-4 md:w-5 md:h-5 ${
-                        isNextStep
+                        isDisabled
+                          ? "text-portage-500/30"
+                          : isNextStep
                           ? "text-woodsmoke-950"
                           : highlightPreview
                           ? "text-[#1C1C1C]"

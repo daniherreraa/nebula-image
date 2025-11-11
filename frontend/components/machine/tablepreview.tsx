@@ -1,4 +1,5 @@
 // app/components/machine/tablepreview.tsx
+import { memo, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -15,18 +16,18 @@ interface TablePreviewProps {
   selectedColumn?: string;
 }
 
-function TablePreview({column_names, preview_data, onColumnClick, selectedColumn}: TablePreviewProps) {
-  const formatValue = (value: string | number | boolean | null) => {
+const TablePreview = memo(function TablePreview({column_names, preview_data, onColumnClick, selectedColumn}: TablePreviewProps) {
+  const formatValue = useCallback((value: string | number | boolean | null) => {
     if (value === null) {
       return <span className="text-portage-400/40 italic text-xs">null</span>;
     }
-    
+
     if (typeof value === 'number') {
       return <span className="tabular-nums">{value.toFixed(4)}</span>;
     }
-    
+
     return <span className="tabular-nums">{String(value)}</span>;
-  };
+  }, []);
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm w-full h-fit flex flex-col">
@@ -126,6 +127,6 @@ function TablePreview({column_names, preview_data, onColumnClick, selectedColumn
       `}</style>
     </div>
   )
-}
+});
 
 export default TablePreview

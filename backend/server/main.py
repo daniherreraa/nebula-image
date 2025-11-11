@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
 
-from api.endpoints import ml_endpoints
+from api.endpoints import ml_endpoints, models_endpoints, users_endpoints
+from config.database import db
 
 # Configurar logging
 logging.basicConfig(
@@ -49,6 +50,18 @@ app.include_router(
     tags=["Machine Learning"]
 )
 
+app.include_router(
+    models_endpoints.router,
+    prefix="/api",
+    tags=["Models"]
+)
+
+app.include_router(
+    users_endpoints.router,
+    prefix="/api",
+    tags=["Users"]
+)
+
 
 @app.get("/")
 async def root():
@@ -74,14 +87,32 @@ async def health_check():
 async def startup_event():
     """Evento de inicio de la aplicación"""
     logger.info("=" * 60)
-    logger.info("Documentación disponible en: http://localhost:8000/docs")
+    logger.info("🚀 Iniciando Nebula ML API...")
+    logger.info("=" * 60)
+
+    # Conectar a la base de datos
+    try:
+        await db.connect()
+        logger.info("✅ Base de datos conectada")
+    except Exception as e:
+        logger.error(f"❌ Error al conectar base de datos: {e}")
+
+    logger.info("=" * 60)
+    logger.info("📚 Documentación disponible en: http://localhost:8000/docs")
     logger.info("=" * 60)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Evento de cierre de la aplicación"""
-    logger.info("Nebula ML API cerrando...")
+    logger.info("🛑 Nebula ML API cerrando...")
+
+    # Desconectar base de datos
+    try:
+        await db.disconnect()
+        logger.info("✅ Base de datos desconectada")
+    except Exception as e:
+        logger.error(f"❌ Error al desconectar base de datos: {e}")
 
 
 if __name__ == "__main__":

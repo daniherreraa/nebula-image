@@ -117,7 +117,33 @@ const Results = () => {
   const selectedModel = trainingConfig?.selectedModel || "Random Forest";
   const metrics = modelResults?.metrics || mockMetrics;
   const predictionsData = modelResults?.predictions || mockPredictionsData;
-  const importanceData = modelResults?.featureImportance || mockImportanceData;
+
+  // Transform feature importance data for the bar chart
+  const importanceData = modelResults?.featureImportance
+    ? modelResults.featureImportance.map((item: any, index: number) => ({
+        index,
+        importance: item.importance,
+        name: item.feature
+      }))
+    : mockImportanceData;
+
+  // Format model name with special characters having reduced opacity
+  const formatModelName = (name: string) => {
+    const specialChars = /[_/\-@]/g;
+    const parts = name.split(specialChars);
+    const matches = name.match(specialChars) || [];
+
+    return (
+      <>
+        {parts.map((part, i) => (
+          <span key={i}>
+            {part.toUpperCase()}
+            {matches[i] && <span className="opacity-30">{matches[i]}</span>}
+          </span>
+        ))}
+      </>
+    );
+  };
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -169,7 +195,7 @@ const Results = () => {
         </h2>
         <span className="text-portage-400/50 font-tanker text-2xl tracking-wide">/</span>
         <span className="text-portage-300 font-space-grotesk text-xl tracking-wide">
-          {selectedModel}
+          {formatModelName(selectedModel)}
         </span>
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
       </div>

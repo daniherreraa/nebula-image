@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Plus, PanelLeftClose } from "lucide-react";
+import { Plus, PanelLeftClose, Eye, Target, TrendingUp } from "lucide-react";
 import { ModelProvider, useModel } from "@/app/context";
 import { InteractiveRunes } from "@/components/interactive-runes";
 import ModelsSidebar from "@/components/machine/models-sidebar";
@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { clearDataset } = useModel();
+  const { clearDataset, currentView, setCurrentView, dataset } = useModel();
   const router = useRouter();
 
   const handleNewModel = () => {
@@ -37,7 +37,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Contenido principal (capa superior) */}
-        <main className="flex-1 p-6 relative flex flex-col overflow-hidden text-woodsmoke-50 z-50">
+        <main className="flex-1 p-6 pb-0 lg:pb-6 relative flex flex-col overflow-hidden text-woodsmoke-50 z-50">
           <div className="w-full h-8 flex flex-row justify-between items-center relative z-[100]">
             <div className="flex flex-row gap-4 items-center text-portage-400">
               {/* Sidebar toggle button */}
@@ -79,9 +79,141 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             {/* User Avatar */}
             <UserAvatarClient />
           </div>
-          {children}
+          <div className="flex-1 overflow-hidden pb-24 lg:pb-0">
+            {children}
+          </div>
         </main>
+
+        {/* Mobile/Tablet Bottom Navigation Bar - Hextech Style - Only show if dataset exists */}
+        {dataset && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[60]">
+            <div className="relative overflow-hidden bg-woodsmoke-950/40 border-t border-portage-500/20 backdrop-blur-md">
+            {/* Hextech top corners */}
+            <div className="absolute -top-0.5 left-4 w-2 h-2 border-l border-t border-portage-500/40" />
+            <div className="absolute -top-0.5 right-4 w-2 h-2 border-r border-t border-portage-500/40" />
+
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-portage-500/50 to-transparent" />
+
+            {/* Hextech glow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-portage-500/5 via-portage-400/10 to-transparent pointer-events-none" />
+
+            <div className="relative flex items-center justify-around pt-3 pb-4">
+              {/* Preview */}
+              <button
+                onClick={() => setCurrentView("preview")}
+                className="flex flex-col items-center gap-1 transition-all duration-300 group"
+              >
+                <div className={`relative w-16 h-8 flex items-center justify-center transition-all duration-300 ${
+                  currentView === "preview"
+                    ? "bg-portage-500/20 border border-portage-500/40"
+                    : "border border-transparent"
+                }`}>
+                  {/* Hextech micro corners on icon container when active */}
+                  {currentView === "preview" && (
+                    <>
+                      <div className="absolute -top-0.5 -left-0.5 w-1 h-1 border-l border-t border-portage-400" />
+                      <div className="absolute -top-0.5 -right-0.5 w-1 h-1 border-r border-t border-portage-400" />
+                      <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 border-l border-b border-portage-400" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-r border-b border-portage-400" />
+                    </>
+                  )}
+                  <Eye className={`w-5 h-5 transition-colors ${
+                    currentView === "preview" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                  }`} />
+                </div>
+                <span className={`font-space-grotesk text-xs uppercase tracking-wider transition-colors ${
+                  currentView === "preview" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                }`}>Preview</span>
+              </button>
+
+              {/* Variable Selection */}
+              <button
+                onClick={() => setCurrentView("selection")}
+                className="flex flex-col items-center gap-1 transition-all duration-300 group relative"
+              >
+                <div className={`relative w-16 h-8 flex items-center justify-center transition-all duration-300 ${
+                  currentView === "selection"
+                    ? "bg-portage-500/20 border border-portage-500/40"
+                    : "border border-transparent"
+                }`}>
+                  {/* Hextech micro corners on icon container when active */}
+                  {currentView === "selection" && (
+                    <>
+                      <div className="absolute -top-0.5 -left-0.5 w-1 h-1 border-l border-t border-portage-400" />
+                      <div className="absolute -top-0.5 -right-0.5 w-1 h-1 border-r border-t border-portage-400" />
+                      <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 border-l border-b border-portage-400" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-r border-b border-portage-400" />
+                    </>
+                  )}
+                  <Target className={`w-5 h-5 transition-colors ${
+                    currentView === "selection" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                  }`} />
+                  {/* Pulsating ring hint when in preview */}
+                  {currentView === "preview" && (
+                    <div className="absolute inset-0 animate-ping-slow opacity-50">
+                      <div className="absolute inset-0 border border-portage-400/50" />
+                    </div>
+                  )}
+                </div>
+                <span className={`font-space-grotesk text-xs uppercase tracking-wider transition-colors ${
+                  currentView === "selection" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                }`}>Train</span>
+              </button>
+
+              {/* Results */}
+              <button
+                onClick={() => setCurrentView("results")}
+                className="flex flex-col items-center gap-1 transition-all duration-300 group"
+              >
+                <div className={`relative w-16 h-8 flex items-center justify-center transition-all duration-300 ${
+                  currentView === "results"
+                    ? "bg-portage-500/20 border border-portage-500/40"
+                    : "border border-transparent"
+                }`}>
+                  {/* Hextech micro corners on icon container when active */}
+                  {currentView === "results" && (
+                    <>
+                      <div className="absolute -top-0.5 -left-0.5 w-1 h-1 border-l border-t border-portage-400" />
+                      <div className="absolute -top-0.5 -right-0.5 w-1 h-1 border-r border-t border-portage-400" />
+                      <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 border-l border-b border-portage-400" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-1 h-1 border-r border-b border-portage-400" />
+                    </>
+                  )}
+                  <TrendingUp className={`w-5 h-5 transition-colors ${
+                    currentView === "results" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                  }`} />
+                </div>
+                <span className={`font-space-grotesk text-xs uppercase tracking-wider transition-colors ${
+                  currentView === "results" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                }`}>Results</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        )}
       </div>
+
+      <style jsx>{`
+        @keyframes ping-slow {
+          0% {
+            transform: scale(1);
+            opacity: 0.5;
+          }
+          50% {
+            transform: scale(1.3);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0;
+          }
+        }
+
+        .animate-ping-slow {
+          animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+      `}</style>
     </SidebarProvider>
   );
 }

@@ -69,15 +69,35 @@ const ModelStepView = ({ modelId }: ModelStepViewProps) => {
 
   return (
     <div className="h-full overflow-y-auto hextech-scroll pr-2">
-      <div className="w-full h-fit flex flex-row justify-between items-center">
-        <div id="TitleContainer">
+      <div className="w-full h-fit flex flex-col lg:flex-row justify-between lg:items-center gap-3 lg:gap-0">
+        <div id="TitleContainer" className="flex-1">
           <h4 className="font-tanker text-woodsmoke-300">{subtitle}</h4>
           <h1 className="font-tanker text-2xl text-woodsmoke-50">
             {title}
           </h1>
+
+          {/* Descriptive text - Mobile/Tablet: below title */}
+          <div className="lg:hidden mt-2">
+            {currentView === "preview" && (
+              <p className="text-portage-400/70 text-sm font-space-grotesk">
+                If everything looks good with your data, proceed to variable selection
+              </p>
+            )}
+            {currentView === "selection" && (
+              <p className="text-portage-400/70 text-sm font-space-grotesk">
+                Select your outcome variable and predictors for the model
+              </p>
+            )}
+            {currentView === "results" && (
+              <p className="text-portage-400/70 text-sm font-space-grotesk">
+                Review the model results and performance metrics
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Desktop navigation - hidden on mobile */}
+        <div className="hidden lg:flex items-center gap-3">
           {/* Descriptive text based on current view */}
           {currentView === "preview" && (
             <p className="text-portage-400/70 text-sm font-space-grotesk text-right">

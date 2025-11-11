@@ -1,12 +1,12 @@
-import FileUploader from "@/components/machine/file-uploader";
-import { auth } from "@/lib/auth";
+import ModelLoader from "@/components/machine/model-loader";
+import { safeAuth } from "@/lib/auth";
 
 export default async function AppPage() {
-  const session = await auth();
+  const session = await safeAuth();
 
   return (
     <div className="flex items-center justify-center w-full h-full text-woodsmoke-50">
-      <FileUploader />
+      <ModelLoader />
     </div>
   );
 }

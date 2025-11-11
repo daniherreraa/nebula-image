@@ -47,12 +47,30 @@ const UserAvatarClient = () => {
     .slice(0, 2) || "U";
 
   const handleSignOut = async () => {
-    // Create a form and submit it to trigger the server action
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "/api/auth/signout";
-    document.body.appendChild(form);
-    form.submit();
+    try {
+      // Get CSRF token
+      const csrfResponse = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfResponse.json();
+
+      // Call signout endpoint
+      await fetch("/api/auth/signout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          csrfToken,
+          callbackUrl: "/",
+        }),
+      });
+
+      // Force a full page reload to clear all client state and redirect
+      window.location.replace("/");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Fallback: force reload to home
+      window.location.replace("/");
+    }
   };
 
   return (

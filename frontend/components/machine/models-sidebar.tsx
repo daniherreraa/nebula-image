@@ -6,42 +6,7 @@ import { X, Plus, BarChart3 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useModel } from "@/app/context/ModelContext";
-
-interface ModelEntry {
-  id: string;
-  filename: string;
-  modelType: string;
-  metrics: {
-    r2: number;
-    mse: number;
-  };
-  createdAt: string;
-}
-
-// Mock data - will be replaced with API data
-const mockModels: ModelEntry[] = [
-  {
-    id: "model-1",
-    filename: "sales_data.csv",
-    modelType: "Random Forest",
-    metrics: { r2: 0.89, mse: 65.2 },
-    createdAt: "2025-01-15T10:30:00Z",
-  },
-  {
-    id: "model-2",
-    filename: "customer_churn.csv",
-    modelType: "Linear Regression",
-    metrics: { r2: 0.76, mse: 123.4 },
-    createdAt: "2025-01-14T15:20:00Z",
-  },
-  {
-    id: "model-3",
-    filename: "inventory_forecast.csv",
-    modelType: "Decision Tree",
-    metrics: { r2: 0.82, mse: 89.7 },
-    createdAt: "2025-01-13T09:45:00Z",
-  },
-];
+import { listModels, MLModelListItem } from "@/lib/api/models";
 
 interface ModelsSidebarProps {
   isOpen: boolean;
@@ -50,15 +15,32 @@ interface ModelsSidebarProps {
 
 const ModelsSidebar = ({ isOpen, onClose }: ModelsSidebarProps) => {
   const router = useRouter();
-  const { clearDataset } = useModel();
-  const [models] = useState<ModelEntry[]>(mockModels);
-  const [currentModelId, setCurrentModelId] = useState<string | null>(null);
+  const { clearDataset, modelId } = useModel();
+  const [models, setModels] = useState<MLModelListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get current model ID from URL
+  // Load models when sidebar opens
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setCurrentModelId(params.get("modelId"));
-  }, []);
+    if (isOpen) {
+      loadModels();
+    }
+  }, [isOpen]);
+
+  const loadModels = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const fetchedModels = await listModels();
+      setModels(fetchedModels);
+    } catch (err: any) {
+      console.error("Error loading models:", err);
+      setError(err.message || "Failed to load models");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleModelClick = (modelId: string) => {
     router.push(`/app?modelId=${modelId}`);
@@ -156,7 +138,26 @@ const ModelsSidebar = ({ isOpen, onClose }: ModelsSidebarProps) => {
 
                 {/* Models List */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {models.length === 0 ? (
+                  {isLoading ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block w-8 h-8 border-2 border-portage-400/20 border-t-portage-400 rounded-full animate-spin" />
+                      <p className="text-portage-400/50 font-space-grotesk text-sm mt-3">
+                        Loading models...
+                      </p>
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-12">
+                      <p className="text-red-400/70 font-space-grotesk text-sm">
+                        {error}
+                      </p>
+                      <button
+                        onClick={loadModels}
+                        className="mt-3 text-portage-400 font-space-grotesk text-xs underline hover:text-portage-300 transition-colors"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  ) : models.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-portage-400/50 font-space-grotesk text-sm">
                         No models yet
@@ -167,7 +168,7 @@ const ModelsSidebar = ({ isOpen, onClose }: ModelsSidebarProps) => {
                     </div>
                   ) : (
                     models.map((model) => {
-                      const isActive = currentModelId === model.id;
+                      const isActive = modelId === model.id;
 
                       return (
                         <button
@@ -215,38 +216,52 @@ const ModelsSidebar = ({ isOpen, onClose }: ModelsSidebarProps) => {
                             }`} />
 
                             <div className="relative p-4 space-y-2">
-                              {/* Filename */}
+                              {/* Model Name */}
                               <h3 className="text-portage-200 font-space-grotesk font-medium text-sm truncate">
-                                {model.filename}
+                                {model.model_name || `Model: ${model.outcome_variable}`}
                               </h3>
 
                               {/* Model Type */}
                               <p className="text-portage-400/70 font-space-grotesk text-xs">
-                                {model.modelType}
+                                {model.selected_model}
                               </p>
 
                               {/* Divider */}
                               <div className="h-px bg-gradient-to-r from-transparent via-portage-500/20 to-transparent" />
 
-                              {/* Metrics - Horizontal */}
+                              {/* Info */}
                               <div className="flex items-center gap-4">
                                 <div className="flex-1">
                                   <p className="text-portage-400/50 font-space-grotesk text-[10px] uppercase tracking-wider mb-0.5">
-                                    R²
+                                    Outcome
                                   </p>
-                                  <p className="text-portage-300 font-space-grotesk text-sm font-medium tabular-nums">
-                                    {model.metrics.r2.toFixed(2)}
+                                  <p className="text-portage-300 font-space-grotesk text-xs truncate">
+                                    {model.outcome_variable}
                                   </p>
                                 </div>
-                                <div className="flex-1">
-                                  <p className="text-portage-400/50 font-space-grotesk text-[10px] uppercase tracking-wider mb-0.5">
-                                    MSE
-                                  </p>
-                                  <p className="text-portage-300 font-space-grotesk text-sm font-medium tabular-nums">
-                                    {model.metrics.mse.toFixed(1)}
-                                  </p>
+                                <div className="flex-shrink-0">
+                                  {model.has_results ? (
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-2 h-2 rounded-full bg-green-400/80" />
+                                      <p className="text-green-400/70 font-space-grotesk text-[10px] uppercase tracking-wider">
+                                        Trained
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-2 h-2 rounded-full bg-portage-400/50" />
+                                      <p className="text-portage-400/50 font-space-grotesk text-[10px] uppercase tracking-wider">
+                                        Pending
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
+
+                              {/* Created date */}
+                              <p className="text-portage-400/40 font-space-grotesk text-[10px]">
+                                {new Date(model.created_at).toLocaleDateString()}
+                              </p>
                             </div>
                           </div>
                         </button>

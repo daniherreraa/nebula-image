@@ -42,6 +42,14 @@ const Preview = () => {
     return dataset.preview.map(row => row[columnName]);
   };
 
+  // Get column summary from backend data
+  const getColumnSummary = (columnName: string) => {
+    if (!dataset.data_summary?.columns_summary) return undefined;
+    return dataset.data_summary.columns_summary.find(
+      (col: any) => col.column === columnName
+    );
+  };
+
   return (
     <>
       <StatusBar
@@ -50,7 +58,7 @@ const Preview = () => {
         columns={dataset.columns}
       />
 
-      <div className="mt-2 flex flex-col lg:h-[44.5vh] lg:flex-row gap-4 overflow-hidden relative">
+      <div className="mt-2 flex flex-col lg:h-[46vh] lg:flex-row gap-4 overflow-hidden relative">
         <div className="w-full lg:w-[60%] flex relative">
           <TablePreview
             column_names={dataset.column_names}
@@ -112,11 +120,13 @@ const Preview = () => {
                       <NumericVariableStats
                         variableName={selectedColumn}
                         data={getColumnData(selectedColumn)}
+                        columnSummary={getColumnSummary(selectedColumn)}
                       />
                     ) : (
                       <CategoricalVariableStats
                         variableName={selectedColumn}
                         data={getColumnData(selectedColumn)}
+                        columnSummary={getColumnSummary(selectedColumn)}
                       />
                     )}
                   </div>
