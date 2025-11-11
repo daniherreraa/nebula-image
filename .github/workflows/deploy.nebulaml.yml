@@ -3,7 +3,7 @@ name: Deploy Nebula to Azure
 on:
   push:
     branches:
-      - main  # Cada vez que hagas push a main, se actualiza en Azure
+      - main  # cada vez que hagas push a main, se actualiza en Azure
 
 jobs:
   deploy:
@@ -13,17 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'NebulaML'  # nombre exacto de tu App Service
           slot-name: 'production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.SECRET_NEBULAML }}
           images: |
             nebulacanadaacr.azurecr.io/nebula-image-frontend:latest
             nebulacanadaacr.azurecr.io/nebula-image-backend:latest
