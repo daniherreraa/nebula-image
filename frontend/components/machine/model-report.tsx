@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, FileText, BarChart3, Settings, Award } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { CorrelationData } from "@/app/context/ModelContext";
 
 interface ModelReportProps {
   modelData: {
@@ -17,7 +18,7 @@ interface ModelReportProps {
       column_names: string[];
       preview_data: Array<Record<string, string | number | null>>;
     };
-    correlation_data?: Record<string, unknown>;
+    correlation_data?: CorrelationData;
     variable_selection: {
       outcome_variable: string;
       predictor_variables: string[];
