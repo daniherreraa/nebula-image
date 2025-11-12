@@ -1,8 +1,22 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-// Use a placeholder during build, NextAuth will validate at runtime
-const AUTH_SECRET = process.env.AUTH_SECRET || 'build-time-placeholder-secret-min-32-chars-required';
+// Use a placeholder ONLY during build time, fail in production if not set
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+const AUTH_SECRET = process.env.AUTH_SECRET || (isBuildTime ? 'build-time-placeholder-secret-min-32-chars-required' : undefined);
+
+// In production runtime, AUTH_SECRET must be defined
+if (!isBuildTime && !AUTH_SECRET) {
+  throw new Error('AUTH_SECRET environment variable is not set. Please configure it in Azure App Service Configuration.');
+}
+
+// Validate Google OAuth credentials in production runtime
+const AUTH_GOOGLE_ID = process.env.AUTH_GOOGLE_ID || (isBuildTime ? 'placeholder-client-id' : undefined);
+const AUTH_GOOGLE_SECRET = process.env.AUTH_GOOGLE_SECRET || (isBuildTime ? 'placeholder-client-secret' : undefined);
+
+if (!isBuildTime && (!AUTH_GOOGLE_ID || !AUTH_GOOGLE_SECRET)) {
+  console.error('Missing Google OAuth credentials. AUTH_GOOGLE_ID or AUTH_GOOGLE_SECRET not set.');
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true, // Required for production/Docker
@@ -10,8 +24,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: AUTH_SECRET,
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID || 'placeholder-client-id',
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || 'placeholder-client-secret',
+      clientId: AUTH_GOOGLE_ID!,
+      clientSecret: AUTH_GOOGLE_SECRET!,
       authorization: {
         params: {
           prompt: "consent",

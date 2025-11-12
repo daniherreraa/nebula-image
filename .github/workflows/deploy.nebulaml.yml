@@ -10,7 +10,8 @@ env:
   ACR_REGISTRY: nebulacanadaacr.azurecr.io
   BACKEND_IMAGE: nebula-image-backend
   FRONTEND_IMAGE: nebula-image-frontend
-  AZURE_WEBAPP_NAME: NebulaML
+  BACKEND_WEBAPP_NAME: nebulabackend
+  FRONTEND_WEBAPP_NAME: nebulafrontend
 
 jobs:
   build-and-deploy:
@@ -59,36 +60,33 @@ jobs:
           cache-from: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
-      # 6. Crear docker-compose para Azure
-      - name: Create docker-compose for Azure
-        run: |
-          cat > docker-compose.yml << EOF
-          version: '3.8'
-          services:
-            backend:
-              image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
-              ports:
-                - "8000:8000"
-              restart: always
-            frontend:
-              image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
-              ports:
-                - "80:3000"
-              restart: always
-          EOF
-
-      # 7. Deploy multi-container to Azure Web App
-      - name: Deploy to Azure Web App
+      # 6. Deploy Backend to Azure Web App
+      - name: Deploy Backend to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.SECRET_NEBULAML }}
-          configuration-file: docker-compose.yml
+          app-name: ${{ env.BACKEND_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.SECRET_NEBULA_BACKEND }}
+          images: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
+
+      # 7. Deploy Frontend to Azure Web App
+      - name: Deploy Frontend to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.FRONTEND_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.SECRET_NEBULA_FRONTEND }}
+          images: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
       # 8. Verificación del deployment
       - name: Verify deployment
         run: |
           echo "✅ Deployment completed successfully!"
-          echo "Backend image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest"
-          echo "Frontend image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest"
-          echo "Commit SHA: ${{ github.sha }}"
+          echo ""
+          echo "🔧 Backend:"
+          echo "  - Image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest"
+          echo "  - URL: https://nebulabackend.azurewebsites.net"
+          echo ""
+          echo "🎨 Frontend:"
+          echo "  - Image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest"
+          echo "  - URL: https://nebulafrontend.azurewebsites.net"
+          echo ""
+          echo "📝 Commit SHA: ${{ github.sha }}"
