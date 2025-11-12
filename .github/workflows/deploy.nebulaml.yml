@@ -59,22 +59,36 @@ jobs:
           cache-from: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
-      # 6. Deploy Frontend to Azure Web App
-      # Note: Backend needs to be deployed separately or run as a sidecar
-      - name: Deploy Frontend to Azure Web App
+      # 6. Crear docker-compose para Azure
+      - name: Create docker-compose for Azure
+        run: |
+          cat > docker-compose.yml << EOF
+          version: '3.8'
+          services:
+            backend:
+              image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
+              ports:
+                - "8000:8000"
+              restart: always
+            frontend:
+              image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
+              ports:
+                - "80:3000"
+              restart: always
+          EOF
+
+      # 7. Deploy multi-container to Azure Web App
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.SECRET_NEBULAML }}
-          images: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
+          configuration-file: docker-compose.yml
 
-      # 7. Verificación del deployment
+      # 8. Verificación del deployment
       - name: Verify deployment
         run: |
           echo "✅ Deployment completed successfully!"
+          echo "Backend image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest"
           echo "Frontend image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest"
-          echo "Backend image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest (pushed to ACR)"
           echo "Commit SHA: ${{ github.sha }}"
-          echo ""
-          echo "⚠️  NOTE: Backend image is built and pushed to ACR but not deployed yet."
-          echo "You need to configure a separate Azure service for the backend or use Azure Container Instances."
