@@ -10,11 +10,6 @@ import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../../lib/user-helper';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
-const AUTH_SECRET = process.env.AUTH_SECRET as string;
-
-if (!AUTH_SECRET) {
-  throw new Error('AUTH_SECRET is not defined. Set it in your environment.');
-}
 
 export async function GET(
   request: NextRequest,
@@ -23,6 +18,15 @@ export async function GET(
   try {
     // Await params in Next.js 15+
     const { modelId } = await params;
+
+    // Validate AUTH_SECRET at runtime
+    const AUTH_SECRET = process.env.AUTH_SECRET;
+    if (!AUTH_SECRET) {
+      return NextResponse.json(
+        { detail: 'Server configuration error: AUTH_SECRET not set' },
+        { status: 500 }
+      );
+    }
 
     // Get the authenticated session
     const session = await safeAuth();
@@ -84,6 +88,15 @@ export async function DELETE(
   try {
     // Await params in Next.js 15+
     const { modelId } = await params;
+
+    // Validate AUTH_SECRET at runtime
+    const AUTH_SECRET = process.env.AUTH_SECRET;
+    if (!AUTH_SECRET) {
+      return NextResponse.json(
+        { detail: 'Server configuration error: AUTH_SECRET not set' },
+        { status: 500 }
+      );
+    }
 
     // Get the authenticated session
     const session = await safeAuth();
