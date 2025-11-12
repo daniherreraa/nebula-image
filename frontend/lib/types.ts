@@ -53,7 +53,7 @@ export interface OutliersAnalysisResponse {
   // Add actual response type based on your backend
   success: boolean;
   message?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Encode Categorical Types
@@ -61,7 +61,7 @@ export interface EncodeCategoricalResponse {
   success: boolean;
   message: string;
   columns_encoded: string[];
-  encoders: Record<string, any>;
+  encoders: Record<string, Record<string, unknown>>;
 }
 
 // Prepare Data Types
@@ -80,10 +80,10 @@ export interface TrainModelRequest {
 export interface TrainModelResponse {
   success: boolean;
   message?: string;
-  metrics?: any;
+  metrics?: Record<string, number | string>;
   predictions?: Array<{actual: number; predicted: number}>;
-  feature_importance?: any[];
+  feature_importance?: Array<{feature: string; importance: number}>;
   model_type?: string;
-  training_info?: any;
-  [key: string]: any;
+  training_info?: Record<string, unknown>;
+  [key: string]: unknown;
 }

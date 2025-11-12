@@ -331,7 +331,7 @@ const NumericVariableStats = ({
 };
 
 // StatCard component
-const StatCard = ({ icon: Icon, label, value, mini = false }: { icon: any; label: string; value: string; mini?: boolean }) => (
+const StatCard = ({ icon: Icon, label, value, mini = false }: { icon: React.ElementType; label: string; value: string; mini?: boolean }) => (
   <div className="relative group bg-woodsmoke-900/50 border border-portage-500/20 p-3 hover:border-portage-400/40 transition-all duration-300">
     <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     <div className="relative space-y-1">

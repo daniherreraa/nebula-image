@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import ModelStepView from "@/components/machine/views/modelstepview";
 
 export default async function ModelPage({

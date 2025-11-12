@@ -46,7 +46,7 @@ const Preview = () => {
   const getColumnSummary = (columnName: string) => {
     if (!dataset.data_summary?.columns_summary) return undefined;
     return dataset.data_summary.columns_summary.find(
-      (col: any) => col.column === columnName
+      (col) => col.column === columnName
     );
   };
 

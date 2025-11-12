@@ -34,9 +34,9 @@ const ModelsSidebar = ({ isOpen, onClose }: ModelsSidebarProps) => {
     try {
       const fetchedModels = await listModels();
       setModels(fetchedModels);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error loading models:", err);
-      setError(err.message || "Failed to load models");
+      setError(err instanceof Error ? err.message : "Failed to load models");
     } finally {
       setIsLoading(false);
     }

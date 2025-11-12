@@ -120,7 +120,7 @@ const Results = () => {
 
   // Transform feature importance data for the bar chart
   const importanceData = modelResults?.featureImportance
-    ? modelResults.featureImportance.map((item: any, index: number) => ({
+    ? modelResults.featureImportance.map((item, index: number) => ({
         index,
         importance: item.importance,
         name: item.feature

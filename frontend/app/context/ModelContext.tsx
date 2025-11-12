@@ -25,7 +25,7 @@ export interface DatasetInfo {
     missing_values_percent: string;
     numeric_columns_count: number;
     categorical_columns_count: number;
-    preview: Array<Record<string, any>>;
+    preview: Array<Record<string, string | number | boolean | null>>;
     columns_summary: Array<{
       column: string;
       dtype: string;
