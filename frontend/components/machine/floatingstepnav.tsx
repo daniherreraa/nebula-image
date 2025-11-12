@@ -55,7 +55,7 @@ export default function FloatingStepNav({
           const Icon = step.icon;
           const isActive = currentStep === step.id;
           const isHovered = hovered === step.id;
-          const isLeaving = leaving === step.id;
+          // const isLeaving = leaving === step.id; // TODO: Implement leaving animation
           const highlightPreview = isActive || (step.id === "preview" && isHovered);
 
           // Detectar si este es el siguiente paso

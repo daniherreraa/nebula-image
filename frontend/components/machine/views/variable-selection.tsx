@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useModel } from "@/app/context";
+import type { RecommendTaskResponse } from "@/lib/types";
 import { OutcomeVariableSelector } from "@/components/machine/outcome-variable-selector";
 import { PredictorPanel } from "@/components/machine/predictor-panel";
 import { OutlierAnalysisSection } from "@/components/machine/outlier-analysis-section";
@@ -42,7 +43,7 @@ const VariableSelection = () => {
   const [nNeighbors, setNNeighbors] = useState<number>(5);
 
   // Model selection states
-  const [recommendedModels, setRecommendedModels] = useState<any>(null);
+  const [recommendedModels, setRecommendedModels] = useState<RecommendTaskResponse | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(trainingConfig?.selectedModel || null);
 
   // Training states
@@ -89,9 +90,9 @@ const VariableSelection = () => {
 
       setHasAnalyzedOutliers(true);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Outlier analysis error:", error);
-      alert(error.message || "Error during outlier analysis");
+      alert(error instanceof Error ? error.message : "Error during outlier analysis");
     } finally {
       setIsAnalyzingOutliers(false);
     }
@@ -235,13 +236,12 @@ const VariableSelection = () => {
         }, 800);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Training error:", error);
 
       // Parse error message
       let errorMessage = "Error durante el entrenamiento";
-
-      if (error.message) {
+      if (error instanceof Error) {
         if (error.message.includes("valores nulos")) {
           errorMessage = "Datos con valores nulos. Active 'Clean Data' en Outlier Analysis.";
         } else if (error.message.includes("categóricas")) {

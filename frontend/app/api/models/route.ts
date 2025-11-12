@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../lib/user-helper';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
-const AUTH_SECRET = process.env.AUTH_SECRET;
+const AUTH_SECRET = process.env.AUTH_SECRET as string;
 
 if (!AUTH_SECRET) {
   throw new Error('AUTH_SECRET is not defined. Set it in your environment.');

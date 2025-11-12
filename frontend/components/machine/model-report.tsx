@@ -15,9 +15,9 @@ interface ModelReportProps {
       rows: number;
       columns: number;
       column_names: string[];
-      preview_data: Array<Record<string, any>>;
+      preview_data: Array<Record<string, string | number | null>>;
     };
-    correlation_data?: any;
+    correlation_data?: Record<string, unknown>;
     variable_selection: {
       outcome_variable: string;
       predictor_variables: string[];
@@ -32,7 +32,7 @@ interface ModelReportProps {
       r2_score?: number;
       accuracy?: number;
       mse?: number;
-      results_data?: any;
+      results_data?: Record<string, unknown>;
     };
   };
 }
@@ -41,7 +41,7 @@ const ModelReport = ({ modelData }: ModelReportProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isCorrelationsOpen, setIsCorrelationsOpen] = useState(false);
 
-  const formatValue = (value: any) => {
+  const formatValue = (value: unknown) => {
     if (value === null || value === undefined) return "N/A";
     if (typeof value === "number") {
       return value.toFixed(4);

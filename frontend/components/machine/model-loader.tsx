@@ -95,9 +95,9 @@ const ModelLoader = () => {
         // Store complete model data for report view
         setLoadedModelData(model);
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error loading model:", err);
-        setError(err.message || "Failed to load model");
+        setError(err instanceof Error ? err.message : "Failed to load model");
         setIsLoadedModel(false);
       } finally {
         setIsLoading(false);

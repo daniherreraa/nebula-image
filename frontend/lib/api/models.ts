@@ -5,6 +5,8 @@
  * The API routes will forward requests to the FastAPI backend with the correct auth headers.
  */
 
+import type { CorrelationData } from '@/app/context/ModelContext';
+
 const API_BASE_URL = '/'; // Use Next.js API routes as proxy
 
 export interface MLModelCreate {
@@ -16,10 +18,42 @@ export interface MLModelCreate {
     rows: number;
     columns: number;
     column_names: string[];
-    preview_data: Array<Record<string, any>>;
-    data_summary?: any;
+    preview_data: Array<Record<string, string | number | null>>;
+    data_summary?: {
+      shape: { rows: number; columns: number };
+      columns: string[];
+      data_types: Record<string, string>;
+      memory_usage_mb: number;
+      missing_values_percent: string;
+      numeric_columns_count: number;
+      categorical_columns_count: number;
+      preview: Array<Record<string, string | number | boolean | null>>;
+      columns_summary: Array<{
+        column: string;
+        dtype: string;
+        non_null_count: number;
+        missing_percent: string;
+        unique_values: number;
+        nan_percentage: string;
+        mean?: number;
+        std?: number;
+        min?: number;
+        max?: number;
+        "25%"?: number;
+        "50%"?: number;
+        "75%"?: number;
+        outliers_detection?: {
+          method: string;
+          lower_bound: number;
+          upper_bound: number;
+          outliers_count: number;
+          outliers_percentage: number;
+          has_outliers: boolean;
+        };
+      }>;
+    };
   };
-  correlation_data?: any;
+  correlation_data?: CorrelationData;
   variable_selection: {
     outcome_variable: string;
     predictor_variables: string[];
@@ -34,7 +68,11 @@ export interface MLModelCreate {
     r2_score?: number;
     accuracy?: number;
     mse?: number;
-    results_data?: any;
+    results_data?: {
+      predictions?: Array<{actual: number; predicted: number}>;
+      feature_importance?: Array<{feature: string; importance: number}>;
+      [key: string]: unknown;
+    };
   };
 }
 
@@ -89,9 +127,9 @@ export async function saveModel(model: MLModelCreate): Promise<MLModelResponse> 
 /**
  * Get all models for the current user
  */
-export async function listModels(userId?: string): Promise<MLModelListItem[]> {
+export async function listModels(): Promise<MLModelListItem[]> {
   try {
-    // Note: userId parameter is ignored - server determines user from session
+    // Note: Server determines user from session
     const response = await fetch(`${API_BASE_URL}api/models`);
 
     if (!response.ok) {

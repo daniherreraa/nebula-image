@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../../lib/user-helper';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
-const AUTH_SECRET = process.env.AUTH_SECRET;
+const AUTH_SECRET = process.env.AUTH_SECRET as string;
 
 if (!AUTH_SECRET) {
   throw new Error('AUTH_SECRET is not defined. Set it in your environment.');
@@ -18,9 +18,12 @@ if (!AUTH_SECRET) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { modelId: string } }
+  { params }: { params: Promise<{ modelId: string }> }
 ) {
   try {
+    // Await params in Next.js 15+
+    const { modelId } = await params;
+
     // Get the authenticated session
     const session = await safeAuth();
 
@@ -47,7 +50,7 @@ export async function GET(
     );
 
     // Make request to backend
-    const backendUrl = `${BACKEND_URL}/api/models/${params.modelId}`;
+    const backendUrl = `${BACKEND_URL}/api/models/${modelId}`;
 
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -76,9 +79,12 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { modelId: string } }
+  { params }: { params: Promise<{ modelId: string }> }
 ) {
   try {
+    // Await params in Next.js 15+
+    const { modelId } = await params;
+
     // Get the authenticated session
     const session = await safeAuth();
 
@@ -105,7 +111,7 @@ export async function DELETE(
     );
 
     // Make request to backend
-    const backendUrl = `${BACKEND_URL}/api/models/${params.modelId}`;
+    const backendUrl = `${BACKEND_URL}/api/models/${modelId}`;
 
     const response = await fetch(backendUrl, {
       method: 'DELETE',

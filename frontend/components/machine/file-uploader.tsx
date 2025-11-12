@@ -78,7 +78,7 @@ const FileUploader = () => {
     }
   }, [router, setModelId, setDataset, setIsLoading]);
 
-  const { getRootProps, getInputProps, open, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, open } = useDropzone({
     onDrop,
     multiple: false,
     accept: { "text/csv": [".csv"] },
