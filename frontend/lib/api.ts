@@ -10,14 +10,7 @@ import {
   TrainModelRequest,
   TrainModelResponse
 } from "@/lib/types";
-
-// Helper to get the correct API URL
-const getApiUrl = () => {
-    // En el navegador usamos localhost, en el servidor usamos el nombre del servicio Docker
-    return typeof window !== 'undefined'
-        ? 'http://localhost:8000'
-        : process.env.NEXT_PUBLIC_API_URL;
-};
+import { getApiUrl } from "@/lib/config";
 
 export async function getDataPreview(): Promise<PreviewData> {
     const apiUrl = getApiUrl();

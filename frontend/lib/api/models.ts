@@ -6,6 +6,7 @@
  */
 
 import type { CorrelationData } from '@/app/context/ModelContext';
+import { getClientApiUrl } from '@/lib/config';
 
 const API_BASE_URL = '/'; // Use Next.js API routes as proxy
 
@@ -187,11 +188,8 @@ export async function deleteModel(modelId: string): Promise<void> {
  */
 export async function downloadModel(modelId: string): Promise<void> {
   try {
-    // Note: This still uses the backend directly for file downloads
-    // You may need to create a proxy route for this as well if needed
-    const backendUrl = typeof window !== 'undefined'
-      ? 'http://localhost:8000'
-      : process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
+    // Note: This uses the backend directly for file downloads
+    const backendUrl = getClientApiUrl();
 
     const response = await fetch(`${backendUrl}/api/download-model/${modelId}`);
 

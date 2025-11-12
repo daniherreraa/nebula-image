@@ -8,6 +8,7 @@ import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { useModel } from "@/app/context";
+import { getClientApiUrl } from "@/lib/config";
 
 const FileUploader = () => {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -30,10 +31,10 @@ const FileUploader = () => {
       setUploading(true);
       setIsLoading(true);
 
-      // En el navegador usamos localhost, en el servidor usamos el nombre del servicio Docker
-      const apiUrl = typeof window !== 'undefined'
-        ? 'http://localhost:8000'
-        : process.env.NEXT_PUBLIC_API_URL;
+      // Use centralized API configuration
+      const apiUrl = getClientApiUrl();
+      console.log('[FileUploader] Using API URL:', apiUrl);
+
       const response = await fetch(`${apiUrl}/api/upload`, {
         method: "POST",
         body: formData,

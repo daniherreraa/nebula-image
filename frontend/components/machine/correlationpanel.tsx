@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModel } from "@/app/context";
+import { getClientApiUrl } from "@/lib/config";
 
 interface CorrelationItem {
   variable1: string;
@@ -28,9 +29,7 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
       setError(null);
 
       try {
-        const apiUrl = typeof window !== 'undefined'
-          ? 'http://localhost:8000'
-          : process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = getClientApiUrl();
 
         const response = await fetch(`${apiUrl}/api/correlations?top_n=10`);
 
