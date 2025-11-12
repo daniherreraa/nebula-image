@@ -58,60 +58,23 @@ jobs:
             ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
-      # 6. Crear docker-compose para Azure
-      - name: Create docker-compose for Azure
-        run: |
-          cat > docker-compose.azure.yml << 'EOF'
-          version: '3.8'
-
-          services:
-            backend:
-              image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
-              ports:
-                - "8000:8000"
-              environment:
-                - PYTHONUNBUFFERED=1
-                - PYTHONDONTWRITEBYTECODE=1
-                - HOST=0.0.0.0
-                - PORT=8000
-                - DATABASE_URL=${DATABASE_URL}
-                - AUTH_SECRET=${AUTH_SECRET}
-              restart: unless-stopped
-
-            frontend:
-              image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
-              ports:
-                - "80:3000"
-              environment:
-                - NODE_ENV=production
-                - NEXT_TELEMETRY_DISABLED=1
-                - NEXT_PUBLIC_API_URL=http://backend:8000
-                - NEXTAUTH_URL=${NEXTAUTH_URL}
-                - AUTH_SECRET=${AUTH_SECRET}
-                - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
-                - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
-              depends_on:
-                - backend
-              restart: unless-stopped
-          EOF
-
-      # 7. Deploy a Azure Web App
-      - name: Deploy to Azure Web App
+      # 6. Deploy Frontend to Azure Web App
+      # Note: Backend needs to be deployed separately or run as a sidecar
+      - name: Deploy Frontend to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.SECRET_NEBULAML }}
-          images: |
-            ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
-            ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
+          images: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
-      # 8. Verificación del deployment
+      # 7. Verificación del deployment
       - name: Verify deployment
         run: |
           echo "✅ Deployment completed successfully!"
-          echo "Backend image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest"
           echo "Frontend image: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest"
+          echo "Backend image: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest (pushed to ACR)"
           echo "Commit SHA: ${{ github.sha }}"
+          echo ""
+          echo "⚠️  NOTE: Backend image is built and pushed to ACR but not deployed yet."
+          echo "You need to configure a separate Azure service for the backend or use Azure Container Instances."
