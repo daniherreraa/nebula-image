@@ -8,8 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { safeAuth } from '@/lib/auth';
 import jwt from 'jsonwebtoken';
 import { getOrCreateUser } from '../../lib/user-helper';
+import { getServerApiUrl } from '@/lib/config';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
+const BACKEND_URL = getServerApiUrl();
 
 export async function GET(
   request: NextRequest,
