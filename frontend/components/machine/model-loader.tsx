@@ -87,7 +87,11 @@ const ModelLoader = () => {
               mse: model.results.mse
             },
             predictions: model.results.results_data?.predictions || [],
-            featureImportance: model.results.results_data?.feature_importance || [],
+            featureImportance: model.results.results_data?.feature_importance?.map((item, index) => ({
+              index,
+              importance: item.importance,
+              name: item.feature
+            })) || [],
             timestamp: model.created_at
           });
         }
