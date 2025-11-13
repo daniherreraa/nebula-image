@@ -82,7 +82,11 @@ async def health_check():
     """Endpoint de health check"""
     return JSONResponse(content={
         "status": "healthy",
-        "service": "Nebula ML API"
+        "service": "Nebula ML API",
+        "version": "1.0.0",
+        "git_commit": "b7f249a",  # Updated with each deployment - includes CORS fix
+        "cors_enabled": True,
+        "allowed_origins": origins
     })
 
 
