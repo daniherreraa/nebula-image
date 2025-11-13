@@ -68,6 +68,11 @@ const Hero = () => {
           </Link>
         </div>
       </div>
+
+      {/* Version Badge */}
+      <div className="absolute bottom-4 right-4 z-50 text-portage-400/50 font-space-grotesk text-xs">
+        v1.0.0 | commit: 63e4ce9
+      </div>
     </div>
   );
 };

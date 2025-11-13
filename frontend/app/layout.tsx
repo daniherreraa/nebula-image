@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import VersionLogger from "@/components/version-logger";
 
 const fontTanker = localFont({
   src: "./assets/fonts/Tanker-Regular.woff2",
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${spaceGotestk.variable} ${fontTanker.variable} antialiased`}
       >
+        <VersionLogger />
         {children}
       </body>
     </html>
