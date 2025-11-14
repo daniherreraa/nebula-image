@@ -1,0 +1,104 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+      - danilab  # También se ejecuta en tu rama de desarrollo
+  workflow_dispatch:  # Permite ejecutarlo manualmente desde GitHub
+
+env:
+  ACR_REGISTRY: nebulacanadaacr.azurecr.io
+  FRONTEND_IMAGE: nebula-image-frontend
+  BACKEND_IMAGE: nebula-image-backend
+  FRONTEND_APP: NebulaFrontend
+  BACKEND_APP: NebulaBackend
+  RESOURCE_GROUP: MisRecursos
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Login a Azure
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. Login a Azure Container Registry
+      - name: Login to ACR
+        run: |
+          az acr login --name nebulacanadaacr
+
+      # 4. Build Frontend Image
+      - name: Build Frontend Docker Image
+        working-directory: ./frontend
+        run: |
+          docker build -t ${{ env.FRONTEND_IMAGE }}:latest .
+          docker tag ${{ env.FRONTEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.FRONTEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
+
+      # 5. Build Backend Image
+      - name: Build Backend Docker Image
+        working-directory: ./backend
+        run: |
+          docker build -t ${{ env.BACKEND_IMAGE }}:latest .
+          docker tag ${{ env.BACKEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.BACKEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
+
+      # 6. Push Frontend to ACR
+      - name: Push Frontend to ACR
+        run: |
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
+
+      # 7. Push Backend to ACR
+      - name: Push Backend to ACR
+        run: |
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
+
+      # 8. Update Frontend Web App
+      - name: Update Frontend Web App
+        run: |
+          az webapp config container set \
+            --name ${{ env.FRONTEND_APP }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      # 9. Update Backend Web App
+      - name: Update Backend Web App
+        run: |
+          az webapp config container set \
+            --name ${{ env.BACKEND_APP }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      # 10. Restart Frontend
+      - name: Restart Frontend
+        run: |
+          az webapp restart --name ${{ env.FRONTEND_APP }} --resource-group ${{ env.RESOURCE_GROUP }}
+
+      # 11. Restart Backend
+      - name: Restart Backend
+        run: |
+          az webapp restart --name ${{ env.BACKEND_APP }} --resource-group ${{ env.RESOURCE_GROUP }}
+
+      # 12. Deployment Summary
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo ""
+          echo "🌐 Frontend: https://nebulafrontend.azurewebsites.net"
+          echo "🌐 Backend: https://nebulabackend.azurewebsites.net/docs"
+          echo ""
+          echo "📦 Images deployed:"
+          echo "  - Frontend: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+          echo "  - Backend: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+          echo ""
+          echo "⏰ Wait 2-3 minutes for containers to fully start"
