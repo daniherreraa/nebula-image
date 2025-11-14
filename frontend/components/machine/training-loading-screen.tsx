@@ -1,6 +1,7 @@
 // components/machine/training-loading-screen.tsx
 "use client";
 import { FileText, AlertCircle } from "lucide-react";
+import { useSmoothProgress } from "@/hooks/useSmoothProgress";
 
 interface TrainingLoadingScreenProps {
   trainingProgress: number;
@@ -15,9 +16,12 @@ export const TrainingLoadingScreen = ({
   onViewResults,
   hasError = false,
 }: TrainingLoadingScreenProps) => {
-  const prevProgress = Math.max(trainingProgress - 1, 0);
-  const nextProgress = Math.min(trainingProgress + 1, 100);
-  const isComplete = trainingProgress >= 100 && !hasError;
+  // Use smooth progress animation instead of abrupt jumps
+  const smoothProgress = useSmoothProgress(trainingProgress, 800);
+
+  const prevProgress = Math.max(smoothProgress - 1, 0);
+  const nextProgress = Math.min(smoothProgress + 1, 100);
+  const isComplete = smoothProgress >= 100 && !hasError;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-8 sm:gap-12 px-4">
@@ -26,7 +30,7 @@ export const TrainingLoadingScreen = ({
         <div className="relative text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-tanker tracking-wide">
           {/* Main text (100% opacity) - ACTUAL */}
           <span className="relative z-50 text-portage-200">
-            {String(trainingProgress).padStart(2, "0")}%
+            {String(smoothProgress).padStart(2, "0")}%
           </span>
 
           {/* Previous value (actual - 1) - con espaciado negativo */}
@@ -42,32 +46,32 @@ export const TrainingLoadingScreen = ({
           {/* Random echoes - capas aleatorias bien difuminadas */}
           {/* Echo 1: actual - aleatorio más difuminado */}
           <span className="absolute top-0 left-0 z-30 text-portage-300 opacity-12 blur-[3px] -translate-x-[25%]">
-            {String(Math.max(trainingProgress - 2, 0)).padStart(2, "0")}%
+            {String(Math.max(smoothProgress - 2, 0)).padStart(2, "0")}%
           </span>
 
           {/* Echo 2: actual + aleatorio más difuminado */}
           <span className="absolute top-0 left-0 z-30 text-portage-300 opacity-12 blur-[3px] translate-x-[25%]">
-            {String(Math.min(trainingProgress + 2, 100)).padStart(2, "0")}%
+            {String(Math.min(smoothProgress + 2, 100)).padStart(2, "0")}%
           </span>
 
           {/* Echo 3: muy difuminado izquierda */}
           <span className="absolute top-0 left-0 z-20 text-portage-300 opacity-8 blur-[4px] -translate-x-[35%]">
-            {String(Math.max(trainingProgress - 3, 0)).padStart(2, "0")}%
+            {String(Math.max(smoothProgress - 3, 0)).padStart(2, "0")}%
           </span>
 
           {/* Echo 4: muy difuminado derecha */}
           <span className="absolute top-0 left-0 z-20 text-portage-300 opacity-8 blur-[4px] translate-x-[35%]">
-            {String(Math.min(trainingProgress + 3, 100)).padStart(2, "0")}%
+            {String(Math.min(smoothProgress + 3, 100)).padStart(2, "0")}%
           </span>
 
           {/* Echo 5: súper difuminado izquierda */}
           <span className="absolute top-0 left-0 z-10 text-portage-300 opacity-5 blur-[5px] -translate-x-[45%]">
-            {String(Math.max(trainingProgress - 4, 0)).padStart(2, "0")}%
+            {String(Math.max(smoothProgress - 4, 0)).padStart(2, "0")}%
           </span>
 
           {/* Echo 6: súper difuminado derecha */}
           <span className="absolute top-0 left-0 z-10 text-portage-300 opacity-5 blur-[5px] translate-x-[45%]">
-            {String(Math.min(trainingProgress + 4, 100)).padStart(2, "0")}%
+            {String(Math.min(smoothProgress + 4, 100)).padStart(2, "0")}%
           </span>
         </div>
       </div>

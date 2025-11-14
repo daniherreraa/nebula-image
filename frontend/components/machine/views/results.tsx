@@ -5,6 +5,7 @@ import { Download, Loader2 } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useModel } from "@/app/context";
+import { getClientApiUrl } from "@/lib/config";
 
 // Mock data - será reemplazado con datos reales del modelo
 const mockPredictionsData = [
@@ -143,29 +144,49 @@ const Results = () => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const modelData = {
-      type: selectedModel,
-      outcomeVariable: trainingConfig?.outcomeVariable,
-      predictors: trainingConfig?.predictors,
-      handleOutliers: trainingConfig?.handleOutliers,
-      metrics,
-      predictions: predictionsData,
-      featureImportance: importanceData,
-      timestamp: modelResults?.timestamp || new Date().toISOString()
-    };
 
-    const blob = new Blob([JSON.stringify(modelData, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${selectedModel.toLowerCase().replace(/\s+/g, "_")}_model.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setIsDownloading(false);
+    try {
+      // Call the backend download-model endpoint
+      const backendUrl = getClientApiUrl();
+      const response = await fetch(`${backendUrl}/api/download-model`, {
+        method: 'GET',
+        credentials: 'include', // Include cookies for authentication if needed
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Failed to download model' }));
+        throw new Error(error.detail || 'Failed to download model');
+      }
+
+      // Get the blob from the response
+      const blob = await response.blob();
+
+      // Extract filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `${selectedModel.toLowerCase().replace(/\s+/g, "_")}_model.joblib`;
+
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename=(.+)/);
+        if (filenameMatch) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+
+      // Create download link and trigger download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error downloading model:', error);
+      // Optionally show an error message to the user
+      alert(error instanceof Error ? error.message : 'Failed to download model');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const scatterChartConfig = {
