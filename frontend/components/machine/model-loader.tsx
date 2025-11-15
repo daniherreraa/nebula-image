@@ -4,9 +4,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useModel } from "@/app/context/ModelContext";
+import { useErrorTheme } from "@/app/context/ErrorThemeContext";
 import { getModel, MLModelResponse } from "@/lib/api/models";
 import FileUploader from "@/components/machine/file-uploader";
 import ModelReport from "@/components/machine/model-report";
+import { ErrorDisplay } from "@/components/machine/error-display";
 
 const ModelLoader = () => {
   const searchParams = useSearchParams();
@@ -23,6 +25,8 @@ const ModelLoader = () => {
     modelId
   } = useModel();
 
+  const { setError: setGlobalError, clearError } = useErrorTheme();
+
   const [loadedModelData, setLoadedModelData] = useState<MLModelResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +37,7 @@ const ModelLoader = () => {
         // No model ID in URL, show regular FileUploader
         setIsLoadedModel(false);
         setLoadedModelData(null);
+        clearError(); // Clear any previous errors
         return;
       }
 
@@ -80,6 +85,28 @@ const ModelLoader = () => {
 
         // Set results if available
         if (model.results) {
+          // Safely parse feature_importance - ensure it's an array
+          const rawFeatureImportance = model.results.results_data?.feature_importance;
+          let featureImportance: Array<{ index: number; importance: number; name: string }> = [];
+
+          if (rawFeatureImportance) {
+            if (Array.isArray(rawFeatureImportance)) {
+              // It's already an array, map it
+              featureImportance = rawFeatureImportance.map((item, index) => ({
+                index,
+                importance: item.importance,
+                name: item.feature
+              }));
+            } else if (typeof rawFeatureImportance === 'object') {
+              // It's an object, convert to array
+              featureImportance = Object.entries(rawFeatureImportance).map(([name, importance], index) => ({
+                index,
+                importance: typeof importance === 'number' ? importance : 0,
+                name
+              }));
+            }
+          }
+
           setModelResults({
             metrics: {
               r2_score: model.results.r2_score,
@@ -87,11 +114,7 @@ const ModelLoader = () => {
               mse: model.results.mse
             },
             predictions: model.results.results_data?.predictions || [],
-            featureImportance: model.results.results_data?.feature_importance?.map((item, index) => ({
-              index,
-              importance: item.importance,
-              name: item.feature
-            })) || [],
+            featureImportance,
             timestamp: model.created_at
           });
         }
@@ -101,7 +124,9 @@ const ModelLoader = () => {
 
       } catch (err: unknown) {
         console.error("Error loading model:", err);
-        setError(err instanceof Error ? err.message : "Failed to load model");
+        const errorMessage = err instanceof Error ? err.message : "Failed to load model";
+        setError(errorMessage);
+        setGlobalError(errorMessage, "platform"); // Set global error state
         setIsLoadedModel(false);
       } finally {
         setIsLoading(false);
@@ -127,20 +152,7 @@ const ModelLoader = () => {
 
   // Show error state
   if (error) {
-    return (
-      <div className="flex items-center justify-center w-full h-full">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="p-6 bg-woodsmoke-950/60 border border-red-500/20 backdrop-blur-sm rounded-sm">
-            <p className="text-red-400 font-space-grotesk text-sm mb-2">
-              Error loading model
-            </p>
-            <p className="text-portage-400/70 font-space-grotesk text-xs">
-              {error}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorDisplay message={error} type="platform" title="Error Loading Model" />;
   }
 
   // Show ModelReport if a model is loaded
