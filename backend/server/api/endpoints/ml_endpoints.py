@@ -271,9 +271,11 @@ async def outliers_analysis(
 
         # Si se solicita limpieza, limpiar datos
         if clean_data:
-            logger.info(f"Limpiando datos con KNN imputation (k={n_neighbors})...")
+            # Determinar método de imputación basado en tamaño del dataset
+            imputation_method = "Median Imputation" if rows_initial > 10000 else "KNN Imputation"
+            logger.info(f"Limpiando datos con {imputation_method}...")
 
-            # Limpiar e imputar (reemplaza outliers con None y luego imputa con KNN)
+            # Limpiar e imputar (reemplaza outliers con None y luego imputa)
             df_cleaned = clean_and_impute(
                 df=df,
                 cols=columns,
@@ -295,8 +297,8 @@ async def outliers_analysis(
 
             response["cleaning_applied"] = True
             response["cleaning_results"] = {
-                "method": "KNN Imputation",
-                "n_neighbors": n_neighbors,
+                "method": imputation_method,
+                "n_neighbors": n_neighbors if imputation_method == "KNN Imputation" else None,
                 "columns_cleaned": columns,
                 "total_outliers_before": int(total_outliers_before),
                 "total_outliers_after": int(total_outliers_after),
@@ -305,7 +307,7 @@ async def outliers_analysis(
                 "rows_after": rows_final,
                 "rows_removed": rows_initial - rows_final
             }
-            response["message"] = f"Outliers detectados y limpiados exitosamente. {total_outliers_before} outliers iniciales → {total_outliers_after} outliers finales mediante KNN imputation."
+            response["message"] = f"Outliers detectados y limpiados exitosamente. {total_outliers_before} outliers iniciales → {total_outliers_after} outliers finales mediante {imputation_method}."
         else:
             response["cleaning_applied"] = False
             response["cleaning_results"] = None

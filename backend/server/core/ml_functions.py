@@ -540,10 +540,21 @@ def clean_and_impute(
     iqr_k: float = 1.5,
     n_neighbors: int = 5
 ) -> pl.DataFrame:
-    """Limpieza de outliers e imputación KNN usando Polars + scikit-learn nativo"""
+    """
+    Limpieza de outliers e imputación inteligente.
+
+    Para datasets grandes (>10,000 filas), usa imputación por mediana (mucho más rápida).
+    Para datasets pequeños, usa KNN imputation (más precisa pero lenta).
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    from sklearn.impute import SimpleImputer
 
     df_clean = df.clone()
+    n_rows = len(df_clean)
 
+    # Paso 1: Reemplazar outliers con None
+    logger.info(f"Limpiando outliers en {len(cols)} columnas con {n_rows:,} filas...")
     for col in cols:
         lower, upper = detect_iqr_bounds(df_clean, col, k=iqr_k)
         df_clean = df_clean.with_columns(
@@ -553,12 +564,22 @@ def clean_and_impute(
               .alias(col)
         )
 
-    imputer = KNNImputer(n_neighbors=n_neighbors)
-    imputed = imputer.fit_transform(df_clean.select(cols))
+    # Paso 2: Imputar valores faltantes
+    # Para datasets grandes (>10,000 filas), usar mediana (O(n log n))
+    # Para datasets pequeños, usar KNN (O(n²))
+    if n_rows > 10000:
+        logger.info(f"Dataset grande detectado ({n_rows:,} filas). Usando imputación por mediana para mejor performance...")
+        imputer = SimpleImputer(strategy='median')
+        imputed = imputer.fit_transform(df_clean.select(cols))
+    else:
+        logger.info(f"Dataset pequeño ({n_rows:,} filas). Usando KNN imputation (k={n_neighbors})...")
+        imputer = KNNImputer(n_neighbors=n_neighbors)
+        imputed = imputer.fit_transform(df_clean.select(cols))
 
     imputed_df = pl.DataFrame(imputed, schema=cols)
     df_clean = df_clean.with_columns(imputed_df)
 
+    logger.info("Limpieza e imputación completada exitosamente")
     return df_clean
 
 
