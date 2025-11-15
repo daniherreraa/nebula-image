@@ -33,3 +33,5 @@ PRESENTATION_*# Database verification scripts with credentials
 backend/verify-database.sh
 *.sh
 !deploy-to-azure.sh
+backend-logs.zip
+PRESENTATION_*
