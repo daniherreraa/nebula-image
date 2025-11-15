@@ -6,6 +6,7 @@ import { ChartContainer } from "@/components/ui/chart";
 import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useModel } from "@/app/context";
 import { getClientApiUrl } from "@/lib/config";
+import { CustomChartTooltip } from "@/components/machine/custom-chart-tooltip";
 
 // Mock data - será reemplazado con datos reales del modelo
 const mockPredictionsData = [
@@ -38,7 +39,7 @@ const mockImportanceData = [
 ];
 
 const mockMetrics = {
-  r2: 0.89,
+  r2_score: 0.89,
   accuracy: 0.89,
   mse: 65.2
 };
@@ -219,9 +220,15 @@ const Results = () => {
 
       {/* Fila de métricas */}
       <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-        <MetricCard label="R²" value={metrics.r2 || 0} />
-        <MetricCard label="Accuracy" value={metrics.accuracy || 0} />
-        <MetricCard label="MSE" value={metrics.mse || 0} />
+        {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
+          <MetricCard label="R²" value={metrics.r2_score} />
+        )}
+        {(metrics.accuracy !== undefined && metrics.accuracy !== null) && (
+          <MetricCard label="Accuracy" value={metrics.accuracy} />
+        )}
+        {(metrics.mse !== undefined && metrics.mse !== null) && (
+          <MetricCard label="MSE" value={metrics.mse} />
+        )}
 
         {/* Botón Download Model */}
         <div className="relative group col-span-3 md:col-span-1">
@@ -260,7 +267,7 @@ const Results = () => {
         <ChartCard
           title="Predictions"
           description="Model predictions vs actual values"
-          className="lg:col-span-3"
+          className={importanceData && importanceData.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}
         >
           <ChartContainer config={scatterChartConfig} className="h-[350px] w-full">
             <ScatterChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
@@ -283,73 +290,57 @@ const Results = () => {
                 tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
                 label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
               />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(23, 23, 23, 0.95)",
-                  border: "1px solid rgba(96, 123, 244, 0.3)",
-                  borderRadius: "0",
-                  color: "rgb(209, 213, 219)",
-                  fontSize: "12px",
-                  fontFamily: "var(--font-space-grotesk)"
-                }}
-              />
+              <Tooltip content={<CustomChartTooltip />} />
               <Scatter data={predictionsData} fill="rgb(96, 123, 244)" />
             </ScatterChart>
           </ChartContainer>
         </ChartCard>
 
-        {/* Bar Chart - 40% (2 columnas) */}
-        <ChartCard
-          title="Feature Importance"
-          description="Most important variables for predictions"
-          className="lg:col-span-2"
-        >
-          <ChartContainer config={barChartConfig} className="h-[350px] w-full">
-            <BarChart data={importanceData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-              <defs>
-                <linearGradient id="barGradientResults" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(96, 123, 244)" stopOpacity="1" />
-                  <stop offset="100%" stopColor="rgb(96, 123, 244)" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="borderGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(96, 123, 244)" stopOpacity="1" />
-                  <stop offset="80%" stopColor="rgb(96, 123, 244)" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="rgb(96, 123, 244)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
-              <XAxis
-                dataKey="index"
-                stroke="rgb(137, 166, 251)"
-                tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-              />
-              <YAxis
-                stroke="rgb(137, 166, 251)"
-                tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(23, 23, 23, 0.95)",
-                  border: "1px solid rgba(96, 123, 244, 0.3)",
-                  borderRadius: "0",
-                  color: "rgb(209, 213, 219)",
-                  fontSize: "12px",
-                  fontFamily: "var(--font-space-grotesk)"
-                }}
-              />
-              <Bar
-                dataKey="importance"
-                fill="url(#barGradientResults)"
-                radius={0}
-                maxBarSize={50}
-                stroke="url(#borderGradient)"
-                strokeWidth={1.5}
-              />
-            </BarChart>
-          </ChartContainer>
-        </ChartCard>
+        {/* Bar Chart - 40% (2 columnas) - Only show if data exists */}
+        {importanceData && importanceData.length > 0 && (
+          <ChartCard
+            title="Feature Importance"
+            description="Most important variables for predictions"
+            className="lg:col-span-2"
+          >
+            <ChartContainer config={barChartConfig} className="h-[350px] w-full">
+              <BarChart data={importanceData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                <defs>
+                  <linearGradient id="barGradientResults" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(96, 123, 244)" stopOpacity="1" />
+                    <stop offset="100%" stopColor="rgb(96, 123, 244)" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="borderGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(96, 123, 244)" stopOpacity="1" />
+                    <stop offset="80%" stopColor="rgb(96, 123, 244)" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="rgb(96, 123, 244)" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
+                <XAxis
+                  dataKey="name"
+                  stroke="rgb(137, 166, 251)"
+                  tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                />
+                <YAxis
+                  stroke="rgb(137, 166, 251)"
+                  tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                />
+                <Tooltip content={<CustomChartTooltip />} />
+                <Bar
+                  dataKey="importance"
+                  fill="url(#barGradientResults)"
+                  radius={0}
+                  maxBarSize={50}
+                  stroke="url(#borderGradient)"
+                  strokeWidth={1.5}
+                />
+              </BarChart>
+            </ChartContainer>
+          </ChartCard>
+        )}
       </div>
     </div>
   );
