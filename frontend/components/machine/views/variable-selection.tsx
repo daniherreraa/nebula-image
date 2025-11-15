@@ -50,6 +50,29 @@ const VariableSelection = () => {
   const [currentMessage, setCurrentMessage] = useState("");
   const [hasTrainingError, setHasTrainingError] = useState(false);
 
+  // Retry handlers
+  const handleRetryTraining = () => {
+    // Reset error state and retry training with same configuration
+    setHasTrainingError(false);
+    setTrainingProgress(0);
+    setCurrentMessage("");
+    // Start training again with same settings
+    startTraining();
+  };
+
+  const handleNewModel = () => {
+    // Reset everything and go back to beginning
+    setHasTrainingError(false);
+    setIsTraining(false);
+    setTrainingProgress(0);
+    setCurrentMessage("");
+    setHasCompletedTraining(false);
+    setSelectedModel(null);
+    setHasAnalyzedOutliers(false);
+    // Scroll to top (outcome selection)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Refs for smooth scrolling
   const predictorsSectionRef = useRef<HTMLDivElement>(null);
   const outliersSectionRef = useRef<HTMLDivElement>(null);
@@ -239,30 +262,26 @@ const VariableSelection = () => {
     } catch (error: unknown) {
       console.error("Training error:", error);
 
-      // Parse error message
-      let errorMessage = "Error durante el entrenamiento";
+      // Parse error message - Convert to friendly English
+      let errorMessage = "Training failed. Please try again or select a different model.";
       if (error instanceof Error) {
-        if (error.message.includes("valores nulos")) {
-          errorMessage = "Datos con valores nulos. Active 'Clean Data' en Outlier Analysis.";
-        } else if (error.message.includes("categóricas")) {
-          errorMessage = "Error al procesar variables categóricas";
-        } else if (error.message.includes("empty")) {
-          errorMessage = "No hay suficientes datos después de la limpieza";
-        } else {
-          errorMessage = error.message;
+        if (error.message.includes("timeout") || error.message.includes("504")) {
+          errorMessage = "Training took too long and timed out. This can happen with very large datasets. Please try again.";
+        } else if (error.message.includes("valores nulos") || error.message.includes("null")) {
+          errorMessage = "Your data contains missing values. Please enable 'Clean Data' in the Outlier Analysis section.";
+        } else if (error.message.includes("categóricas") || error.message.includes("categorical")) {
+          errorMessage = "Error processing categorical variables. Please check your data and try again.";
+        } else if (error.message.includes("empty") || error.message.includes("insufficient")) {
+          errorMessage = "Not enough data remaining after cleaning. Try adjusting outlier settings or using a different dataset.";
+        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+          errorMessage = "Network error. Please check your connection and try again.";
         }
       }
 
       setCurrentMessage(errorMessage);
       setHasTrainingError(true);
-
-      // Keep showing error for 5 seconds before resetting
-      setTimeout(() => {
-        setIsTraining(false);
-        setTrainingProgress(0);
-        setCurrentMessage("");
-        setHasTrainingError(false);
-      }, 5000);
+      // Keep training state active but in error mode - do NOT auto-reset
+      // User must manually retry or start a new model
     }
   };
 
@@ -347,6 +366,8 @@ const VariableSelection = () => {
         currentMessage={currentMessage}
         onViewResults={() => setCurrentView("results")}
         hasError={hasTrainingError}
+        onRetryTraining={handleRetryTraining}
+        onNewModel={handleNewModel}
       />
     );
   }

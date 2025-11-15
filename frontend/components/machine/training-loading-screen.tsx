@@ -1,6 +1,6 @@
 // components/machine/training-loading-screen.tsx
 "use client";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, RefreshCw, Plus } from "lucide-react";
 import { useSmoothProgress } from "@/hooks/useSmoothProgress";
 
 interface TrainingLoadingScreenProps {
@@ -8,6 +8,8 @@ interface TrainingLoadingScreenProps {
   currentMessage: string;
   onViewResults: () => void;
   hasError?: boolean;
+  onRetryTraining?: () => void;
+  onNewModel?: () => void;
 }
 
 export const TrainingLoadingScreen = ({
@@ -15,6 +17,8 @@ export const TrainingLoadingScreen = ({
   currentMessage,
   onViewResults,
   hasError = false,
+  onRetryTraining,
+  onNewModel,
 }: TrainingLoadingScreenProps) => {
   // Use smooth progress animation instead of abrupt jumps
   const smoothProgress = useSmoothProgress(trainingProgress, 800);
@@ -78,10 +82,66 @@ export const TrainingLoadingScreen = ({
 
       {/* Progress message */}
       {hasError ? (
-        <div className="flex flex-col items-center gap-4">
-          <AlertCircle className="w-12 h-12 text-red-400 animate-pulse" />
-          <div className="text-red-300 font-space-grotesk text-sm sm:text-base md:text-lg tracking-wide text-center max-w-md">
+        <div className="flex flex-col items-center gap-6 max-w-xl px-4">
+          {/* Error Icon */}
+          <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-carnation-400 animate-pulse" />
+
+          {/* Error Message */}
+          <div className="text-carnation-300 font-space-grotesk text-sm sm:text-base md:text-lg tracking-wide text-center">
             {currentMessage}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-2">
+            {/* Try Again Button */}
+            {onRetryTraining && (
+              <button
+                onClick={onRetryTraining}
+                className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/30 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/50"
+              >
+                {/* Hextech corners */}
+                <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/50 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/50 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/50 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/50 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+                {/* Background glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                {/* Button content */}
+                <div className="relative px-6 py-3 flex items-center justify-center gap-3">
+                  <RefreshCw className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                  <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors whitespace-nowrap">
+                    Try Again
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {/* New Model Button */}
+            {onNewModel && (
+              <button
+                onClick={onNewModel}
+                className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40"
+              >
+                {/* Hextech corners */}
+                <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+                <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+                {/* Background glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                {/* Button content */}
+                <div className="relative px-6 py-3 flex items-center justify-center gap-3">
+                  <Plus className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                  <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors whitespace-nowrap">
+                    New Model
+                  </span>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       ) : !isComplete ? (

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Sklearn imports
 from sklearn.impute import KNNImputer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
@@ -948,14 +948,54 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
         # División de datos con estratificación para clasificación
         is_classification = any(clf in model_type for clf in ['classification', 'logistic', 'naive_bayes', 'svm_classification', 'knn'])
 
+        # OPTIMIZATION: Intelligent stratified sampling for large datasets to prevent Azure timeouts
+        # This maintains scientific validity while reducing training time
+        use_sampling = False
+        original_dataset_size = len(X)
+
         if is_classification and len(np.unique(y)) > 1:
+            # Standard train/test split with stratification
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=0.2, random_state=42, stratify=y
             )
+
+            # OPTIMIZATION: Apply intelligent sampling for large datasets (>30,000 rows)
+            # Target: ~24,000 training samples (scientifically valid, prevents timeout)
+            if len(X_train) > 24000:
+                use_sampling = True
+                target_samples = 24000
+                logger.info(f"OPTIMIZATION: Large dataset detected ({len(X_train):,} training samples)")
+                logger.info(f"OPTIMIZATION: Applying stratified sampling to {target_samples:,} samples")
+                logger.info(f"OPTIMIZATION: This maintains scientific validity while preventing Azure timeouts")
+
+                # Use StratifiedShuffleSplit to maintain class distribution
+                sss = StratifiedShuffleSplit(n_splits=1, train_size=target_samples, random_state=42)
+                train_idx, _ = next(sss.split(X_train, y_train))
+                X_train = X_train[train_idx]
+                y_train = y_train[train_idx]
+
+                logger.info(f"OPTIMIZATION: Training set reduced from {len(train_idx):,} to {len(X_train):,} samples")
+                logger.info(f"OPTIMIZATION: Test set kept at full size: {len(X_test):,} samples for proper validation")
         else:
+            # Regression or single-class classification
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=0.2, random_state=42
             )
+
+            # OPTIMIZATION: For regression with large datasets, use simple random sampling
+            if len(X_train) > 24000:
+                use_sampling = True
+                target_samples = 24000
+                logger.info(f"OPTIMIZATION: Large dataset detected ({len(X_train):,} training samples)")
+                logger.info(f"OPTIMIZATION: Applying random sampling to {target_samples:,} samples")
+
+                # Random sampling for regression
+                from sklearn.utils import resample
+                X_train, y_train = resample(X_train, y_train, n_samples=target_samples,
+                                           random_state=42, replace=False)
+
+                logger.info(f"OPTIMIZATION: Training set sampled to {len(X_train):,} samples")
+                logger.info(f"OPTIMIZATION: Test set kept at full size: {len(X_test):,} samples for proper validation")
 
         # Escalamiento de features
         scaler = StandardScaler()
@@ -1013,14 +1053,27 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "random_forest_regression":
-            model = RandomForestRegressor(
-                n_estimators=200,
-                max_depth=15,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42,
-                n_jobs=-1
-            )
+            # OPTIMIZATION: Use reduced hyperparameters for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for Random Forest (large dataset)")
+                model = RandomForestRegressor(
+                    n_estimators=100,  # Reduced from 200 for faster training
+                    max_depth=10,      # Reduced from 15 to prevent overfitting on sampled data
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = RandomForestRegressor(
+                    n_estimators=200,
+                    max_depth=15,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1036,14 +1089,27 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "gradient_boosting_regression":
-            model = GradientBoostingRegressor(
-                n_estimators=150,
-                learning_rate=0.1,
-                max_depth=5,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42
-            )
+            # OPTIMIZATION: Use reduced n_estimators for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for Gradient Boosting (large dataset)")
+                model = GradientBoostingRegressor(
+                    n_estimators=100,  # Reduced from 150 for faster training
+                    learning_rate=0.1,
+                    max_depth=5,       # Keep at 5 (already optimal)
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = GradientBoostingRegressor(
+                    n_estimators=150,
+                    learning_rate=0.1,
+                    max_depth=5,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1059,16 +1125,31 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "xgboost_regression":
-            model = XGBRegressor(
-                n_estimators=150,
-                learning_rate=0.1,
-                max_depth=6,
-                min_child_weight=3,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                random_state=42,
-                n_jobs=-1
-            )
+            # OPTIMIZATION: Use reduced hyperparameters for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for XGBoost (large dataset)")
+                model = XGBRegressor(
+                    n_estimators=100,  # Reduced from 150 for faster training
+                    learning_rate=0.1,
+                    max_depth=5,       # Reduced from 6 for faster training
+                    min_child_weight=3,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    n_jobs=-1
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = XGBRegressor(
+                    n_estimators=150,
+                    learning_rate=0.1,
+                    max_depth=6,
+                    min_child_weight=3,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    n_jobs=-1
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1119,14 +1200,27 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "random_forest_classification":
-            model = RandomForestClassifier(
-                n_estimators=200,
-                max_depth=15,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42,
-                n_jobs=-1
-            )
+            # OPTIMIZATION: Use reduced hyperparameters for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for Random Forest (large dataset)")
+                model = RandomForestClassifier(
+                    n_estimators=100,  # Reduced from 200 for faster training
+                    max_depth=10,      # Reduced from 15 to prevent overfitting on sampled data
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = RandomForestClassifier(
+                    n_estimators=200,
+                    max_depth=15,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1146,14 +1240,27 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "gradient_boosting_classification":
-            model = GradientBoostingClassifier(
-                n_estimators=150,
-                learning_rate=0.1,
-                max_depth=5,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42
-            )
+            # OPTIMIZATION: Use reduced n_estimators for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for Gradient Boosting (large dataset)")
+                model = GradientBoostingClassifier(
+                    n_estimators=100,  # Reduced from 150 for faster training
+                    learning_rate=0.1,
+                    max_depth=5,       # Keep at 5 (already optimal)
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = GradientBoostingClassifier(
+                    n_estimators=150,
+                    learning_rate=0.1,
+                    max_depth=5,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1173,16 +1280,31 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             }
 
         elif model_type == "xgboost_classification":
-            model = XGBClassifier(
-                n_estimators=150,
-                learning_rate=0.1,
-                max_depth=6,
-                min_child_weight=3,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                random_state=42,
-                n_jobs=-1
-            )
+            # OPTIMIZATION: Use reduced hyperparameters for large datasets to prevent timeout
+            if use_sampling:
+                logger.info("OPTIMIZATION: Using optimized hyperparameters for XGBoost (large dataset)")
+                model = XGBClassifier(
+                    n_estimators=100,  # Reduced from 150 for faster training
+                    learning_rate=0.1,
+                    max_depth=5,       # Reduced from 6 for faster training
+                    min_child_weight=3,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    n_jobs=-1
+                )
+            else:
+                # Standard hyperparameters for small/medium datasets
+                model = XGBClassifier(
+                    n_estimators=150,
+                    learning_rate=0.1,
+                    max_depth=6,
+                    min_child_weight=3,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    n_jobs=-1
+                )
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
@@ -1283,7 +1405,20 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             "test_samples": len(X_test),
             "original_samples": len(clean_data),
             "categorical_encoders": categorical_encoders if categorical_encoders else None,
+            # OPTIMIZATION: Track sampling and optimization strategy
+            "optimization_applied": use_sampling,
+            "optimization_strategy": "stratified_sampling" if (use_sampling and is_classification) else ("random_sampling" if use_sampling else "none"),
+            "original_dataset_size": original_dataset_size,
         }
+
+        # OPTIMIZATION: Log final training information
+        if use_sampling:
+            logger.info(f"OPTIMIZATION SUMMARY:")
+            logger.info(f"  - Original dataset size: {original_dataset_size:,} samples")
+            logger.info(f"  - Training set size after sampling: {len(X_train):,} samples")
+            logger.info(f"  - Test set size (kept full): {len(X_test):,} samples")
+            logger.info(f"  - Strategy: {training_info['optimization_strategy']}")
+            logger.info(f"  - Hyperparameters optimized for large dataset performance")
 
         # Preparar datos de predicciones para visualización (limitar a 100 puntos para performance)
         max_points = min(100, len(y_test))
