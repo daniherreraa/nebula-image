@@ -74,6 +74,17 @@
   --color-woodsmoke-800: #454545;
   --color-woodsmoke-900: #3d3d3d;
   --color-woodsmoke-950: #151515;
+  --color-carnation-50: #fdf3f3;
+  --color-carnation-100: #fde4e3;
+  --color-carnation-200: #fbcecd;
+  --color-carnation-300: #f8aba9;
+  --color-carnation-400: #ef6461;
+  --color-carnation-500: #e74f4c;
+  --color-carnation-600: #d3322f;
+  --color-carnation-700: #b12724;
+  --color-carnation-800: #932321;
+  --color-carnation-900: #7a2422;
+  --color-carnation-950: #420e0d;
 }
 
 :root {
