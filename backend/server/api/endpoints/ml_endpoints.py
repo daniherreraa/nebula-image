@@ -271,9 +271,18 @@ async def outliers_analysis(
 
         # Si se solicita limpieza, limpiar datos
         if clean_data:
-            # Determinar método de imputación basado en tamaño del dataset
-            imputation_method = "Median Imputation" if rows_initial > 10000 else "KNN Imputation"
-            logger.info(f"Limpiando datos con {imputation_method}...")
+            # Determinar método de imputación basado en estrategia de 3 niveles
+            if rows_initial <= 5000:
+                imputation_method = "KNN Imputation"
+                method_description = "Máxima precisión usando K-Nearest Neighbors"
+            elif rows_initial <= 50000:
+                imputation_method = "MICE (IterativeImputer)"
+                method_description = "Multivariate Imputation by Chained Equations - captura relaciones entre variables"
+            else:
+                imputation_method = "Median Imputation"
+                method_description = "Imputación rápida por mediana para datasets masivos"
+
+            logger.info(f"Limpiando datos con {imputation_method} ({rows_initial:,} filas)...")
 
             # Limpiar e imputar (reemplaza outliers con None y luego imputa)
             df_cleaned = clean_and_impute(
@@ -298,6 +307,7 @@ async def outliers_analysis(
             response["cleaning_applied"] = True
             response["cleaning_results"] = {
                 "method": imputation_method,
+                "method_description": method_description,
                 "n_neighbors": n_neighbors if imputation_method == "KNN Imputation" else None,
                 "columns_cleaned": columns,
                 "total_outliers_before": int(total_outliers_before),

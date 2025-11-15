@@ -541,20 +541,30 @@ def clean_and_impute(
     n_neighbors: int = 5
 ) -> pl.DataFrame:
     """
-    Limpieza de outliers e imputación inteligente.
+    Limpieza de outliers e imputación inteligente de 3 niveles.
 
-    Para datasets grandes (>10,000 filas), usa imputación por mediana (mucho más rápida).
-    Para datasets pequeños, usa KNN imputation (más precisa pero lenta).
+    Estrategia basada en tamaño del dataset:
+    - ≤5,000 filas: KNN Imputation (máxima precisión, O(n²))
+    - 5,001-50,000 filas: MICE/IterativeImputer (robusto y razonablemente rápido)
+    - >50,000 filas: Median Imputation (muy rápido para datasets masivos)
+
+    IterativeImputer implementa MICE (Multivariate Imputation by Chained Equations),
+    método científicamente validado (van Buuren & Groothuis-Oudshoorn, 2011) que
+    captura relaciones entre variables.
     """
     import logging
     logger = logging.getLogger(__name__)
     from sklearn.impute import SimpleImputer
+    from sklearn.experimental import enable_iterative_imputer
+    from sklearn.impute import IterativeImputer
+    from sklearn.ensemble import ExtraTreesRegressor
 
     df_clean = df.clone()
     n_rows = len(df_clean)
+    n_cols = len(cols)
 
     # Paso 1: Reemplazar outliers con None
-    logger.info(f"Limpiando outliers en {len(cols)} columnas con {n_rows:,} filas...")
+    logger.info(f"Limpiando outliers en {n_cols} columnas con {n_rows:,} filas...")
     for col in cols:
         lower, upper = detect_iqr_bounds(df_clean, col, k=iqr_k)
         df_clean = df_clean.with_columns(
@@ -564,22 +574,50 @@ def clean_and_impute(
               .alias(col)
         )
 
-    # Paso 2: Imputar valores faltantes
-    # Para datasets grandes (>10,000 filas), usar mediana (O(n log n))
-    # Para datasets pequeños, usar KNN (O(n²))
-    if n_rows > 10000:
-        logger.info(f"Dataset grande detectado ({n_rows:,} filas). Usando imputación por mediana para mejor performance...")
-        imputer = SimpleImputer(strategy='median')
-        imputed = imputer.fit_transform(df_clean.select(cols))
-    else:
-        logger.info(f"Dataset pequeño ({n_rows:,} filas). Usando KNN imputation (k={n_neighbors})...")
+    # Paso 2: Imputar valores faltantes con estrategia de 3 niveles
+
+    if n_rows <= 5000:
+        # Datasets pequeños: KNN (máxima precisión)
+        logger.info(f"Dataset pequeño ({n_rows:,} filas). Usando KNN Imputation (k={n_neighbors}) para máxima precisión...")
         imputer = KNNImputer(n_neighbors=n_neighbors)
         imputed = imputer.fit_transform(df_clean.select(cols))
+        method_used = "KNN"
+
+    elif n_rows <= 50000:
+        # Datasets medianos: MICE/IterativeImputer (balance óptimo)
+        logger.info(f"Dataset mediano ({n_rows:,} filas, {n_cols} columnas). Usando MICE/IterativeImputer con ExtraTreesRegressor...")
+        logger.info("Este método captura relaciones entre variables (científicamente validado)")
+
+        # Configuración optimizada para performance
+        # max_iter reducido para datasets grandes
+        max_iter = 5 if n_rows > 20000 else 10
+
+        imputer = IterativeImputer(
+            estimator=ExtraTreesRegressor(
+                n_estimators=10,  # Reducido para performance
+                max_depth=10,
+                min_samples_leaf=5,
+                n_jobs=-1,
+                random_state=42
+            ),
+            max_iter=max_iter,
+            random_state=42,
+            verbose=0
+        )
+        imputed = imputer.fit_transform(df_clean.select(cols))
+        method_used = "MICE"
+
+    else:
+        # Datasets grandes: Median (muy rápido)
+        logger.info(f"Dataset grande ({n_rows:,} filas). Usando Median Imputation para óptima performance...")
+        imputer = SimpleImputer(strategy='median')
+        imputed = imputer.fit_transform(df_clean.select(cols))
+        method_used = "Median"
 
     imputed_df = pl.DataFrame(imputed, schema=cols)
     df_clean = df_clean.with_columns(imputed_df)
 
-    logger.info("Limpieza e imputación completada exitosamente")
+    logger.info(f"Limpieza e imputación completada exitosamente usando {method_used}")
     return df_clean
 
 
