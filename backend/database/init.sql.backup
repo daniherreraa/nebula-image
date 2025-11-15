@@ -1,9 +1,12 @@
--- Nebula ML Database Schema (Azure PostgreSQL Compatible)
--- Uses gen_random_uuid() instead of uuid-ossp extension
+-- Nebula ML Database Schema
+-- Creates tables for users and ML models
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table (for Auth.js integration)
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255),
     image TEXT,
@@ -14,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Accounts table (for Auth.js OAuth)
 CREATE TABLE IF NOT EXISTS accounts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     type VARCHAR(255) NOT NULL,
     provider VARCHAR(255) NOT NULL,
@@ -31,7 +34,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 -- Sessions table (for Auth.js)
 CREATE TABLE IF NOT EXISTS sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     session_token VARCHAR(255) UNIQUE NOT NULL,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expires TIMESTAMP WITH TIME ZONE NOT NULL
@@ -107,11 +110,9 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger to automatically update updated_at
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_ml_models_updated_at ON ml_models;
 CREATE TRIGGER update_ml_models_updated_at BEFORE UPDATE ON ml_models
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -146,12 +147,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to limit models after insert
-DROP TRIGGER IF EXISTS limit_models_trigger ON ml_models;
 CREATE TRIGGER limit_models_trigger
 AFTER INSERT ON ml_models
 FOR EACH ROW
 WHEN (NEW.model_file_path IS NOT NULL)
 EXECUTE FUNCTION limit_user_models();
-
--- Success message
-SELECT 'Database schema initialized successfully!' AS status;

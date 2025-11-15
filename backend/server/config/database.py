@@ -41,21 +41,29 @@ class Database:
 
     async def execute(self, query: str, *args):
         """Execute a query that doesn't return rows"""
+        if not self.pool:
+            raise RuntimeError("Database connection pool is not initialized. Call connect() first.")
         async with self.pool.acquire() as connection:
             return await connection.execute(query, *args)
 
     async def fetch(self, query: str, *args):
         """Execute a query and return all rows"""
+        if not self.pool:
+            raise RuntimeError("Database connection pool is not initialized. Call connect() first.")
         async with self.pool.acquire() as connection:
             return await connection.fetch(query, *args)
 
     async def fetchrow(self, query: str, *args):
         """Execute a query and return a single row"""
+        if not self.pool:
+            raise RuntimeError("Database connection pool is not initialized. Call connect() first.")
         async with self.pool.acquire() as connection:
             return await connection.fetchrow(query, *args)
 
     async def fetchval(self, query: str, *args):
         """Execute a query and return a single value"""
+        if not self.pool:
+            raise RuntimeError("Database connection pool is not initialized. Call connect() first.")
         async with self.pool.acquire() as connection:
             return await connection.fetchval(query, *args)
 
@@ -65,5 +73,14 @@ db = Database()
 
 
 async def get_db() -> Database:
-    """Dependency for FastAPI routes"""
+    """
+    Dependency for FastAPI routes
+
+    Returns the global database instance and ensures it's connected
+    """
+    if not db.pool:
+        logger.warning("⚠️ Database pool not initialized when get_db() was called")
+        logger.info("Attempting to reconnect to database...")
+        await db.connect()
+
     return db
