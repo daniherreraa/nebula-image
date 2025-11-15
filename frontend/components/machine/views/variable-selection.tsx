@@ -185,10 +185,16 @@ const VariableSelection = () => {
         };
 
         setModelResults(results);
-        setHasCompletedTraining(true);
 
         setCurrentMessage("¡Entrenamiento completado!");
         setTrainingProgress(100);
+
+        // Navigate to results immediately BEFORE marking as completed
+        // This prevents the brief flash of the selection view
+        setCurrentView("results");
+
+        // Mark as completed after navigation starts
+        setHasCompletedTraining(true);
 
         // Step 5: Save model to database
         try {
@@ -253,10 +259,11 @@ const VariableSelection = () => {
           setIsSavingModel(false);
         }
 
-        // Navigate to results after a brief delay
+        // Navigation to results already happened earlier to prevent flash
+        // Reset training state after a brief delay to ensure smooth transition
         setTimeout(() => {
-          setCurrentView("results");
-        }, 800);
+          setIsTraining(false);
+        }, 500);
       }
 
     } catch (error: unknown) {
@@ -306,13 +313,6 @@ const VariableSelection = () => {
   const handleRemovePredictor = (value: string) => {
     setPredictors(predictors.filter((p) => p !== value));
   };
-
-  // Reset isTraining when navigating back to selection view
-  useEffect(() => {
-    if (hasCompletedTraining && isTraining && trainingProgress >= 100) {
-      setIsTraining(false);
-    }
-  }, [hasCompletedTraining, isTraining, trainingProgress, setIsTraining]);
 
   // Smooth scroll when outcome variable is selected (predictors panel appears)
   useEffect(() => {

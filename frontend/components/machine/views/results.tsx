@@ -121,8 +121,9 @@ const Results = () => {
   const predictionsData = modelResults?.predictions || mockPredictionsData;
 
   // Transform feature importance data for the bar chart
+  // Sort by importance in descending order (highest to lowest)
   const importanceData = modelResults?.featureImportance
-    ? modelResults.featureImportance
+    ? [...modelResults.featureImportance].sort((a, b) => b.importance - a.importance)
     : mockImportanceData;
 
   // Format model name with special characters having reduced opacity
@@ -219,7 +220,7 @@ const Results = () => {
       </div>
 
       {/* Fila de métricas */}
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
           <MetricCard label="R²" value={metrics.r2_score} />
         )}
@@ -229,9 +230,15 @@ const Results = () => {
         {(metrics.mse !== undefined && metrics.mse !== null) && (
           <MetricCard label="MSE" value={metrics.mse} />
         )}
+        {(metrics.rmse !== undefined && metrics.rmse !== null) && (
+          <MetricCard label="RMSE" value={metrics.rmse} />
+        )}
+        {(metrics.mae !== undefined && metrics.mae !== null) && (
+          <MetricCard label="MAE" value={metrics.mae} />
+        )}
 
         {/* Botón Download Model */}
-        <div className="relative group col-span-3 md:col-span-1">
+        <div className="relative group col-span-2 sm:col-span-3 lg:col-span-1">
           <button
             onClick={handleDownload}
             disabled={isDownloading}
