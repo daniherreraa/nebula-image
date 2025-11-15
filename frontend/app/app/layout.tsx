@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Plus, PanelLeftClose, Eye, Target, TrendingUp } from "lucide-react";
 import { ModelProvider, useModel } from "@/app/context";
+import { ErrorThemeProvider, useErrorTheme } from "@/app/context/ErrorThemeContext";
 import { InteractiveRunes } from "@/components/interactive-runes";
 import ModelsSidebar from "@/components/machine/models-sidebar";
 import UserAvatarClient from "@/components/auth/user-avatar-client";
@@ -12,6 +13,7 @@ import { useRouter } from "next/navigation";
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { clearDataset, currentView, setCurrentView, dataset } = useModel();
+  const { themeColor } = useErrorTheme();
   const router = useRouter();
 
   const handleNewModel = () => {
@@ -30,10 +32,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <InteractiveRunes />
         </div>
 
-        {/* Efectos de luz portage (capa media) */}
-        <div className="absolute inset-0 z-20">
-          <div className="absolute -top-[12rem] w-[90%] h-[30%] bg-portage-400 rounded-4xl blur-[210.10000610351562px] transform left-1/2 -translate-x-1/2 antialiased" />
-          <div className="absolute -bottom-[12rem] w-[90%] h-[30%] bg-portage-400 rounded-4xl blur-[210.10000610351562px] transform left-1/2 -translate-x-1/2 antialiased" />
+        {/* Efectos de luz reactivos (capa media) */}
+        <div className="absolute inset-0 z-20 transition-all duration-1000">
+          <div className={`absolute -top-[12rem] w-[90%] h-[30%] ${themeColor === "carnation" ? "bg-carnation-400" : "bg-portage-400"} rounded-4xl blur-[210.10000610351562px] transform left-1/2 -translate-x-1/2 antialiased transition-all duration-1000`} />
+          <div className={`absolute -bottom-[12rem] w-[90%] h-[30%] ${themeColor === "carnation" ? "bg-carnation-400" : "bg-portage-400"} rounded-4xl blur-[210.10000610351562px] transform left-1/2 -translate-x-1/2 antialiased transition-all duration-1000`} />
         </div>
 
         {/* Contenido principal (capa superior) */}
@@ -221,7 +223,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ModelProvider>
-      <LayoutContent>{children}</LayoutContent>
+      <ErrorThemeProvider>
+        <LayoutContent>{children}</LayoutContent>
+      </ErrorThemeProvider>
     </ModelProvider>
   );
 }
