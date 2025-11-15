@@ -1188,11 +1188,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1224,11 +1228,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1264,11 +1272,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1308,11 +1320,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1328,11 +1344,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1344,11 +1364,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1360,11 +1384,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train_scaled, y_train)
             y_pred = model.predict(X_test_scaled)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
@@ -1381,11 +1409,15 @@ def train_model(df: pl.DataFrame, features: list, label: str, model_type: str):
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
+            # Determine if binary or multiclass classification
+            n_classes = len(np.unique(y_test))
+            average_method = 'binary' if n_classes == 2 else 'weighted'
+
             metrics = {
                 "accuracy": float(accuracy_score(y_test, y_pred)),
-                "precision": float(precision_score(y_test, y_pred)),
-                "recall": float(recall_score(y_test, y_pred)),
-                "f1_score": float(f1_score(y_test, y_pred)),
+                "precision": float(precision_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "recall": float(recall_score(y_test, y_pred, average=average_method, zero_division=0)),
+                "f1_score": float(f1_score(y_test, y_pred, average=average_method, zero_division=0)),
                 "classification_report": classification_report(
                     y_test, y_pred, output_dict=True, zero_division=0
                 ),
