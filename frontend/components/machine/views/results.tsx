@@ -220,7 +220,7 @@ const Results = () => {
       </div>
 
       {/* Fila de métricas */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
           <MetricCard label="R²" value={metrics.r2_score} />
         )}
@@ -238,7 +238,7 @@ const Results = () => {
         )}
 
         {/* Botón Download Model */}
-        <div className="relative group col-span-2 sm:col-span-3 lg:col-span-1">
+        <div className="relative group col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-1">
           <button
             onClick={handleDownload}
             disabled={isDownloading}

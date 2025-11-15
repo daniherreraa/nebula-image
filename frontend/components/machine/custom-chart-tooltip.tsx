@@ -45,26 +45,31 @@ export const CustomChartTooltip = ({ active, payload, label, labelFormatter }: C
           )}
 
           {/* Payload values */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {payload.map((entry, index) => {
-              // Try to get feature name from payload if available
-              const displayName = entry.payload?.name || entry.name;
+              // Get feature name from payload - check multiple possible locations
+              const featureName = entry.payload?.feature || entry.payload?.name || entry.name;
               const displayValue = typeof entry.value === 'number'
                 ? entry.value.toFixed(4)
                 : entry.value;
 
               return (
-                <div key={`item-${index}`} className="flex items-center gap-2">
-                  {/* Color indicator */}
-                  <div
-                    className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: 'rgb(96, 123, 244)' }}
-                  />
+                <div key={`item-${index}`} className="flex flex-col gap-0.5">
+                  {/* Feature name - prominently displayed */}
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: 'rgb(96, 123, 244)' }}
+                    />
+                    <span className="text-portage-200 font-space-grotesk text-xs font-semibold">
+                      {featureName}
+                    </span>
+                  </div>
 
-                  {/* Label and value */}
-                  <div className="flex items-baseline gap-1.5">
+                  {/* Importance value */}
+                  <div className="ml-3.5 flex items-baseline gap-1">
                     <span className="text-portage-400/70 font-space-grotesk text-[10px] uppercase tracking-wider">
-                      {displayName}:
+                      Importance:
                     </span>
                     <span className="text-portage-200 font-space-grotesk text-xs font-medium tabular-nums">
                       {displayValue}
