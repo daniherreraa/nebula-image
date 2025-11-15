@@ -15,7 +15,8 @@ echo "================================================="
 echo ""
 
 # Database connection string
-DB_URL="postgresql://NebulaMLadmin:Proyectone2025@nebuladb.postgres.database.azure.com:5432/postgres?sslmode=require"
+# IMPORTANTE: Copia este archivo como verify-database.sh y reemplaza con tus credenciales reales
+DB_URL="postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST:5432/postgres?sslmode=require"
 
 echo "📡 Paso 1: Verificando conexión a la base de datos..."
 if psql "$DB_URL" -c "SELECT 1;" > /dev/null 2>&1; then
@@ -38,7 +39,7 @@ fi
 
 echo ""
 echo "🏗️  Paso 3: Ejecutando script de inicialización..."
-if psql "$DB_URL" -f "/home/dani/Documentos/apps/nebula-image/backend/database/init.sql" > /dev/null 2>&1; then
+if psql "$DB_URL" -f "./database/init.sql" > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Script de inicialización ejecutado correctamente${NC}"
 else
     echo -e "${RED}❌ Error al ejecutar script de inicialización${NC}"
@@ -60,16 +61,7 @@ for table in "${REQUIRED_TABLES[@]}"; do
 done
 
 echo ""
-echo "🔍 Paso 5: Verificando extensión uuid-ossp..."
-if psql "$DB_URL" -t -c "SELECT 1 FROM pg_extension WHERE extname = 'uuid-ossp';" | grep -q 1; then
-    echo -e "${GREEN}✅ Extensión uuid-ossp instalada${NC}"
-else
-    echo -e "${RED}❌ Extensión uuid-ossp NO instalada${NC}"
-    ALL_GOOD=false
-fi
-
-echo ""
-echo "📊 Paso 6: Verificando índices..."
+echo "📊 Paso 5: Verificando índices..."
 INDEXES=$(psql "$DB_URL" -t -c "SELECT indexname FROM pg_indexes WHERE schemaname = 'public';")
 INDEX_COUNT=$(echo "$INDEXES" | grep -v '^$' | wc -l)
 echo "   Índices encontrados: $INDEX_COUNT"
@@ -82,7 +74,7 @@ if [ "$ALL_GOOD" = true ]; then
     echo ""
     echo "La base de datos está lista. Puedes reiniciar el backend con:"
     echo ""
-    echo -e "${YELLOW}az webapp restart --name nebulabackend --resource-group <resource-group>${NC}"
+    echo -e "${YELLOW}az webapp restart --name YOUR_BACKEND_APP --resource-group YOUR_RESOURCE_GROUP${NC}"
     echo ""
     exit 0
 else
