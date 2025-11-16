@@ -22,82 +22,174 @@ jobs:
       # 1. Checkout del código
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para obtener todo el historial de git
 
-      # 2. Login a Azure
+      # 2. Configurar Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      # 3. Actualizar versiones en archivos
+      - name: Update version tracking
+        id: version
+        run: |
+          # Obtener el commit SHA corto (primeros 7 caracteres)
+          SHORT_SHA=$(git rev-parse --short=7 HEAD)
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+          echo "📝 Actualizando versiones al commit: $SHORT_SHA"
+
+          # Actualizar backend/server/main.py
+          sed -i "s/\"git_commit\": \"[a-f0-9]*\"/\"git_commit\": \"$SHORT_SHA\"/" backend/server/main.py
+
+          # Actualizar frontend/components/version-logger.tsx
+          sed -i "s/const GIT_COMMIT = \"[a-f0-9]*\"/const GIT_COMMIT = \"$SHORT_SHA\"/" frontend/components/version-logger.tsx
+
+          # Verificar si hubo cambios
+          if git diff --quiet; then
+            echo "✅ Las versiones ya están actualizadas"
+            echo "version_updated=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Versiones actualizadas exitosamente"
+            echo "version_updated=true" >> $GITHUB_OUTPUT
+
+            # Mostrar cambios
+            echo "📋 Cambios realizados:"
+            git diff backend/server/main.py frontend/components/version-logger.tsx
+          fi
+
+      # 4. Commit y push de cambios de versión (si los hay)
+      - name: Commit version changes
+        if: steps.version.outputs.version_updated == 'true'
+        run: |
+          git add backend/server/main.py frontend/components/version-logger.tsx
+          git commit -m "🤖 Auto-update version tracking to ${{ steps.version.outputs.short_sha }}
+
+          Updated by GitHub Actions deployment workflow.
+
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+          Co-Authored-By: GitHub Actions <actions@github.com>"
+
+          # Push usando el token de GitHub
+          git push
+
+      # 5. Login a Azure
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. Login a Azure Container Registry
+      # 6. Login a Azure Container Registry
       - name: Login to ACR
         run: |
           az acr login --name nebulacanadaacr
 
-      # 4. Build Frontend Image
+      # 7. Build Frontend Image
       - name: Build Frontend Docker Image
         working-directory: ./frontend
         run: |
+          echo "🏗️ Building Frontend..."
           docker build -t ${{ env.FRONTEND_IMAGE }}:latest .
-          docker tag ${{ env.FRONTEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.FRONTEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.short_sha }}
           docker tag ${{ env.FRONTEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
-      # 5. Build Backend Image
+      # 8. Build Backend Image
       - name: Build Backend Docker Image
         working-directory: ./backend
         run: |
+          echo "🏗️ Building Backend..."
           docker build -t ${{ env.BACKEND_IMAGE }}:latest .
-          docker tag ${{ env.BACKEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.BACKEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.short_sha }}
           docker tag ${{ env.BACKEND_IMAGE }}:latest ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
 
-      # 6. Push Frontend to ACR
+      # 9. Push Frontend to ACR
       - name: Push Frontend to ACR
         run: |
-          docker push ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          echo "⬆️ Pushing Frontend images..."
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.short_sha }}
           docker push ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
-      # 7. Push Backend to ACR
+      # 10. Push Backend to ACR
       - name: Push Backend to ACR
         run: |
-          docker push ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          echo "⬆️ Pushing Backend images..."
+          docker push ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.short_sha }}
           docker push ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
 
-      # 8. Update Frontend Web App
+      # 11. Update Frontend Web App
       - name: Update Frontend Web App
         run: |
+          echo "🔄 Updating Frontend Web App..."
           az webapp config container set \
             --name ${{ env.FRONTEND_APP }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:latest
 
-      # 9. Update Backend Web App
+      # 12. Update Backend Web App
       - name: Update Backend Web App
         run: |
+          echo "🔄 Updating Backend Web App..."
           az webapp config container set \
             --name ${{ env.BACKEND_APP }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+            --container-image-name ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:latest
 
-      # 10. Restart Frontend
+      # 13. Restart Frontend
       - name: Restart Frontend
         run: |
+          echo "🔄 Restarting Frontend..."
           az webapp restart --name ${{ env.FRONTEND_APP }} --resource-group ${{ env.RESOURCE_GROUP }}
 
-      # 11. Restart Backend
+      # 14. Restart Backend
       - name: Restart Backend
         run: |
+          echo "🔄 Restarting Backend..."
           az webapp restart --name ${{ env.BACKEND_APP }} --resource-group ${{ env.RESOURCE_GROUP }}
 
-      # 12. Deployment Summary
+      # 15. Wait for services to start
+      - name: Wait for services
+        run: |
+          echo "⏳ Waiting 60 seconds for services to fully start..."
+          sleep 60
+
+      # 16. Verify Backend Deployment
+      - name: Verify Backend Deployment
+        run: |
+          echo "🔍 Verifying backend deployment..."
+          RESPONSE=$(curl -s https://nebulabackend.azurewebsites.net/health)
+          DEPLOYED_COMMIT=$(echo $RESPONSE | jq -r '.git_commit')
+
+          echo "Expected commit: ${{ steps.version.outputs.short_sha }}"
+          echo "Deployed commit: $DEPLOYED_COMMIT"
+
+          if [ "$DEPLOYED_COMMIT" == "${{ steps.version.outputs.short_sha }}" ]; then
+            echo "✅ Backend deployment verified successfully!"
+          else
+            echo "⚠️ Warning: Backend may still be starting. Deployed commit doesn't match yet."
+            echo "Give it 2-3 more minutes to fully start."
+          fi
+
+      # 17. Deployment Summary
       - name: Deployment Summary
         run: |
-          echo "✅ Deployment completed successfully!"
+          echo "================================================"
+          echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY!"
+          echo "================================================"
           echo ""
-          echo "🌐 Frontend: https://nebulafrontend.azurewebsites.net"
-          echo "🌐 Backend: https://nebulabackend.azurewebsites.net/docs"
+          echo "🌐 URLs:"
+          echo "  - Frontend: https://nebulafrontend.azurewebsites.net"
+          echo "  - Backend:  https://nebulabackend.azurewebsites.net/docs"
+          echo "  - Health:   https://nebulabackend.azurewebsites.net/health"
           echo ""
           echo "📦 Images deployed:"
-          echo "  - Frontend: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
-          echo "  - Backend: ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+          echo "  - Frontend: ${{ env.ACR_REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ steps.version.outputs.short_sha }}"
+          echo "  - Backend:  ${{ env.ACR_REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ steps.version.outputs.short_sha }}"
           echo ""
-          echo "⏰ Wait 2-3 minutes for containers to fully start"
+          echo "🏷️ Version: ${{ steps.version.outputs.short_sha }}"
+          echo "📋 Commit: ${{ github.sha }}"
+          echo ""
+          echo "⏰ Services should be fully ready in 2-3 minutes"
+          echo "================================================"
