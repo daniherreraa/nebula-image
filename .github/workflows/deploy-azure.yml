@@ -14,6 +14,9 @@ env:
   BACKEND_APP: NebulaBackend
   RESOURCE_GROUP: MisRecursos
 
+permissions:
+  contents: write  # Permite que el workflow haga commits y push
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
