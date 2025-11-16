@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 const VERSION = "1.0.0";
-const GIT_COMMIT = "9b02b62";
+const GIT_COMMIT = "1a31c8a";
 const BUILD_DATE = new Date().toISOString();
 
 export default function VersionLogger() {
