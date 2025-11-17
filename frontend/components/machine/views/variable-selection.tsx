@@ -446,7 +446,7 @@ const VariableSelection = () => {
                 <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
               </div>
 
-              <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+              <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed">
                 Ready to train your model. Click below to begin the training process with your selected configuration.
               </p>
             </div>

@@ -222,7 +222,7 @@ export default function FloatingStepNav({
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-woodsmoke-100 md:text-woodsmoke-500 font-space-grotesk text-[0.65rem] text-center md:text-left max-w-xs"
+          className="text-woodsmoke-100 md:text-woodsmoke-500 font-space-grotesk text-sm text-center md:text-left max-w-xs"
         >
           {currentStep === "preview" && "Review your dataset structure and preview the data"}
           {currentStep === "summary" && "Explore correlations and statistical summaries"}

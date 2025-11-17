@@ -66,7 +66,7 @@ export const OutcomeVariableSelector = ({
           <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
         </div>
 
-        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+        <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed">
           Select the variable you want to predict. This is the outcome your model will learn to forecast based on the predictor variables.
         </p>
       </div>

@@ -169,7 +169,7 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
                 Strongest Correlations
               </h3>
               <div className="h-px bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent mt-1.5" />
-              <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] mt-2 leading-relaxed">
+              <p className="text-woodsmoke-100 font-space-grotesk text-base mt-2 leading-relaxed">
                 Top 10 {method === 'pearson' ? "Pearson's" : method === 'spearman' ? "Spearman's" : "Kendall's"} correlations.
                 {method === 'pearson' && " Pearson is known for detecting linear relationships between variables."}
                 {method === 'spearman' && " Spearman measures monotonic relationships, ideal for ranked data."}

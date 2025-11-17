@@ -42,8 +42,8 @@ export const OutlierAnalysisSection = ({
           <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
         </div>
 
-        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
-          Configure outlier detection and data cleaning. Enable KNN imputation to handle missing values and detect anomalies using IQR method.
+        <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed">
+          Configure outlier detection and data cleaning. Enable "Clean Data" to automatically handle missing values using KNN imputation and detect anomalies with the IQR method. This improves model accuracy by removing statistical outliers.
         </p>
       </div>
 

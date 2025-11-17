@@ -31,7 +31,7 @@ export const ModelSelection = ({
       // First, send the selected features and label
       await selectFeatures({
         features: predictors,
-        label: outcomeVariable,
+        label: targetVariable,
       });
 
       // Then, get the recommended models
@@ -58,7 +58,7 @@ export const ModelSelection = ({
           <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
         </div>
 
-        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+        <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed">
           View AI-recommended models based on your data characteristics. Each model is optimized for specific prediction tasks.
         </p>
       </div>
