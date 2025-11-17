@@ -37,12 +37,6 @@ export default function RootLayout({
           <Toaster
             position="top-right"
             toastOptions={{
-              style: {
-                background: 'var(--card)',
-                border: '1px solid var(--border)',
-                color: 'var(--card-foreground)',
-                fontFamily: 'var(--font-space-grotesk)',
-              },
               className: 'font-space-grotesk',
             }}
           />

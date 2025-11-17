@@ -216,6 +216,20 @@
   }
 }
 
+/* Toast styling for dark theme */
+:root:not(.light) [data-sonner-toast] {
+  background: rgb(27, 28, 34) !important;
+  border: 1px solid rgba(137, 166, 251, 0.2) !important;
+  color: rgb(231, 231, 231) !important;
+}
+
+/* Toast styling for light theme */
+.light [data-sonner-toast] {
+  background: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
 /* Light theme overrides for Piltover/Arcane aesthetic */
 .light {
   /* Override woodsmoke colors for light theme with dark tones */

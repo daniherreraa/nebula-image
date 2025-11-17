@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Plus, PanelLeftClose, Eye, Target, TrendingUp } from "lucide-react";
 import { ModelProvider, useModel } from "@/app/context";
 import { ErrorThemeProvider, useErrorTheme } from "@/app/context/ErrorThemeContext";
+import { ThemeProvider } from "@/app/context/theme-context";
 import { InteractiveRunes } from "@/components/interactive-runes";
 import ModelsSidebar from "@/components/machine/models-sidebar";
 import UserAvatarClient from "@/components/auth/user-avatar-client";
@@ -222,10 +223,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <ModelProvider>
-      <ErrorThemeProvider>
-        <LayoutContent>{children}</LayoutContent>
-      </ErrorThemeProvider>
-    </ModelProvider>
+    <ThemeProvider>
+      <ModelProvider>
+        <ErrorThemeProvider>
+          <LayoutContent>{children}</LayoutContent>
+        </ErrorThemeProvider>
+      </ModelProvider>
+    </ThemeProvider>
   );
 }
