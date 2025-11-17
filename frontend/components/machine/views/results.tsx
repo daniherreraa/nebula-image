@@ -1,6 +1,6 @@
 // components/machine/views/results.tsx
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
@@ -47,9 +47,10 @@ const mockMetrics = {
 interface MetricCardProps {
   label: string;
   value: number;
+  description?: string;
 }
 
-function MetricCard({ label, value }: MetricCardProps) {
+function MetricCard({ label, value, description }: MetricCardProps) {
   return (
     <div className="relative group">
       {/* Hextech corners like predictor cards */}
@@ -69,6 +70,11 @@ function MetricCard({ label, value }: MetricCardProps) {
           <div className="text-portage-200 text-2xl sm:text-3xl md:text-4xl font-tanker tabular-nums">
             {typeof value === 'number' ? value.toFixed(2) : value}
           </div>
+          {description && (
+            <div className="text-woodsmoke-100 text-[0.65rem] sm:text-xs font-space-grotesk mt-2 leading-relaxed opacity-80">
+              {description}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -118,7 +124,12 @@ const Results = () => {
   // Use context data or fallback to mock data
   const selectedModel = trainingConfig?.selectedModel || "Random Forest";
   const metrics = modelResults?.metrics || mockMetrics;
-  const predictionsData = modelResults?.predictions || mockPredictionsData;
+
+  // Sort predictions data by actual value to ensure proper X-axis ordering
+  const predictionsData = useMemo(() => {
+    const data = modelResults?.predictions || mockPredictionsData;
+    return [...data].sort((a, b) => a.actual - b.actual);
+  }, [modelResults?.predictions]);
 
   // Transform feature importance data for the bar chart
   // Sort by importance in descending order (highest to lowest)
@@ -222,19 +233,39 @@ const Results = () => {
       {/* Fila de métricas */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
-          <MetricCard label="R²" value={metrics.r2_score} />
+          <MetricCard
+            label="R²"
+            value={metrics.r2_score}
+            description="Coefficient of Determination. Measures how well predictions fit actual values (0-1, higher is better)."
+          />
         )}
         {(metrics.accuracy !== undefined && metrics.accuracy !== null) && (
-          <MetricCard label="Accuracy" value={metrics.accuracy} />
+          <MetricCard
+            label="Accuracy"
+            value={metrics.accuracy}
+            description="Percentage of correct predictions. Shows overall model correctness (0-1, higher is better)."
+          />
         )}
         {(metrics.mse !== undefined && metrics.mse !== null) && (
-          <MetricCard label="MSE" value={metrics.mse} />
+          <MetricCard
+            label="MSE"
+            value={metrics.mse}
+            description="Mean Squared Error. Average of squared differences between predictions and actual values (lower is better)."
+          />
         )}
         {(metrics.rmse !== undefined && metrics.rmse !== null) && (
-          <MetricCard label="RMSE" value={metrics.rmse} />
+          <MetricCard
+            label="RMSE"
+            value={metrics.rmse}
+            description="Root Mean Squared Error. Square root of MSE, in original units. Penalizes large errors (lower is better)."
+          />
         )}
         {(metrics.mae !== undefined && metrics.mae !== null) && (
-          <MetricCard label="MAE" value={metrics.mae} />
+          <MetricCard
+            label="MAE"
+            value={metrics.mae}
+            description="Mean Absolute Error. Average absolute difference between predictions and actual values (lower is better)."
+          />
         )}
 
         {/* Botón Download Model */}

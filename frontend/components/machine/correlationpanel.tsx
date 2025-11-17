@@ -76,7 +76,37 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
     if (isLoading) {
       return (
         <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border-x border-b border-portage-500/20 backdrop-blur-sm h-full flex flex-col items-center justify-center">
-          <div className="text-portage-400 font-space-grotesk text-sm">Loading correlations...</div>
+          {/* Hextech loading animation */}
+          <div className="relative flex items-center justify-center mb-4">
+            {/* Rotating hexagon */}
+            <svg className="w-16 h-16 text-portage-400 animate-spin-slow" viewBox="0 0 100 100">
+              <polygon
+                points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="opacity-60"
+              />
+              <polygon
+                points="50,15 80,32.5 80,67.5 50,85 20,67.5 20,32.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="opacity-40"
+              />
+            </svg>
+            {/* Pulsing core */}
+            <div className="absolute w-3 h-3 rounded-full bg-portage-400 animate-pulse" />
+            <div className="absolute w-6 h-6 rounded-full bg-portage-400/30 animate-ping" />
+          </div>
+
+          {/* Loading text */}
+          <div className="text-portage-300 font-space-grotesk text-sm tracking-wider animate-pulse">
+            Calculating correlations...
+          </div>
+          <div className="text-portage-400/60 font-space-grotesk text-xs mt-1">
+            Analyzing data patterns
+          </div>
         </div>
       );
     }
@@ -139,6 +169,12 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
                 Strongest Correlations
               </h3>
               <div className="h-px bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent mt-1.5" />
+              <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] mt-2 leading-relaxed">
+                Top 10 {method === 'pearson' ? "Pearson's" : method === 'spearman' ? "Spearman's" : "Kendall's"} correlations.
+                {method === 'pearson' && " Pearson is known for detecting linear relationships between variables."}
+                {method === 'spearman' && " Spearman measures monotonic relationships, ideal for ranked data."}
+                {method === 'kendall' && " Kendall assesses ordinal associations, robust against outliers."}
+              </p>
             </div>
           </div>
 
@@ -349,7 +385,7 @@ const CorrelationPanel = ({ columns }: CorrelationPanelProps) => {
         }
 
         .animate-spin-slow {
-          animation: spin-slow 8s linear infinite;
+          animation: spin-slow 4s linear infinite;
         }
 
         .clip-corners {

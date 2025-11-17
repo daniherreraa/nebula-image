@@ -21,7 +21,8 @@ export const TrainingLoadingScreen = ({
   onNewModel,
 }: TrainingLoadingScreenProps) => {
   // Use smooth progress animation instead of abrupt jumps
-  const smoothProgress = useSmoothProgress(trainingProgress, 800);
+  // Increased duration to 1800ms for slower, more visible transitions
+  const smoothProgress = useSmoothProgress(trainingProgress, 1800);
 
   const prevProgress = Math.max(smoothProgress - 1, 0);
   const nextProgress = Math.min(smoothProgress + 1, 100);
