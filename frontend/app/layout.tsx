@@ -41,6 +41,7 @@ export default function RootLayout({
               color: 'rgb(220, 222, 241)',
               fontFamily: 'var(--font-space-grotesk)',
             },
+            descriptionClassName: 'text-woodsmoke-100',
           }}
         />
       </body>

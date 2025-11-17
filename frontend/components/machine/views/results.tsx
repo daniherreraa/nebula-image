@@ -127,7 +127,7 @@ function ChartCard({ title, description, children, className = "" }: ChartCardPr
           <h3 className="text-base sm:text-lg font-space-grotesk font-medium text-portage-300 mb-1 tracking-wide">
             {title}
           </h3>
-          <p className="text-xs font-space-grotesk text-woodsmoke-100 mb-3 sm:mb-4 leading-relaxed">
+          <p className="text-sm sm:text-base font-space-grotesk text-woodsmoke-100 mb-3 sm:mb-4 leading-relaxed">
             {description}
           </p>
           <div className="mt-3 sm:mt-4">
@@ -285,16 +285,70 @@ const Results = () => {
 
   return (
     <div className="h-full flex flex-col gap-6 py-6">
-      {/* Título con modelo */}
-      <div className="flex items-center gap-3">
-        <h2 className="text-portage-300 font-tanker text-2xl tracking-wide">
-          Model Results
-        </h2>
-        <span className="text-portage-400/50 font-tanker text-2xl tracking-wide">/</span>
-        <span className="text-portage-300 font-space-grotesk text-xl tracking-wide">
-          {formatModelName(selectedModel)}
-        </span>
-        <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+      {/* Título con modelo y botones */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          <h2 className="text-portage-300 font-tanker text-2xl tracking-wide">
+            Model Results
+          </h2>
+          <span className="text-portage-400/50 font-tanker text-2xl tracking-wide">/</span>
+          <span className="text-portage-300 font-space-grotesk text-xl tracking-wide">
+            {formatModelName(selectedModel)}
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent hidden sm:block" />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <button
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {/* Hextech corners */}
+            <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+            {/* Background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Button content */}
+            <div className="relative px-4 py-2 flex items-center justify-center gap-2">
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 text-portage-400 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+              )}
+              <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors whitespace-nowrap">
+                {isDownloading ? "Downloading..." : "Download Model"}
+              </span>
+            </div>
+          </button>
+
+          <button
+            onClick={handleCreateNewModel}
+            className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40"
+          >
+            {/* Hextech corners */}
+            <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+            {/* Background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Button content */}
+            <div className="relative px-4 py-2 flex items-center justify-center gap-2">
+              <Plus className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+              <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors whitespace-nowrap">
+                Create Another Model
+              </span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Metrics - In same row (max 3) */}
@@ -328,58 +382,6 @@ const Results = () => {
           )}
         </div>
       )}
-
-      {/* Download and Create New Model Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {/* Hextech corners */}
-          <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-
-          {/* Background glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Button content */}
-          <div className="relative px-4 py-3 flex items-center justify-center gap-2">
-            {isDownloading ? (
-              <Loader2 className="w-4 h-4 text-portage-400 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
-            )}
-            <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
-              {isDownloading ? "Downloading..." : "Download Model"}
-            </span>
-          </div>
-        </button>
-
-        <button
-          onClick={handleCreateNewModel}
-          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40"
-        >
-          {/* Hextech corners */}
-          <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-          <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-
-          {/* Background glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Button content */}
-          <div className="relative px-4 py-3 flex items-center justify-center gap-2">
-            <Plus className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
-            <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
-              Create Another Model
-            </span>
-          </div>
-        </button>
-      </div>
 
       {/* Main Charts Row - Predictions 40%, Feature Importance 60% */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
