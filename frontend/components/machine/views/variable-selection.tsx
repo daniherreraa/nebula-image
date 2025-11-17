@@ -39,7 +39,7 @@ const VariableSelection = () => {
   const [targetVariable, setTargetVariable] = useState<string>(trainingConfig?.targetVariable || trainingConfig?.outcomeVariable || "");
   const [predictors, setPredictors] = useState<string[]>(trainingConfig?.predictors || []);
   const [hasAnalyzedOutliers, setHasAnalyzedOutliers] = useState(false);
-  const [cleanData, setCleanData] = useState(true);
+  const [cleanData, setCleanData] = useState(false);
   const [iqrK, setIqrK] = useState<number>(1.5);
   const [nNeighbors, setNNeighbors] = useState<number>(5);
 
