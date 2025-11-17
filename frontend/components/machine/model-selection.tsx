@@ -2,7 +2,7 @@
 "use client";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { selectFeatures, recommendTask } from "@/lib/api";
+import { recommendTask } from "@/lib/api";
 import type { ModelInfo } from "@/lib/types";
 
 interface ModelSelectionProps {
@@ -28,13 +28,7 @@ export const ModelSelection = ({
     setError(null);
 
     try {
-      // First, send the selected features and label
-      await selectFeatures({
-        features: predictors,
-        label: targetVariable,
-      });
-
-      // Then, get the recommended models
+      // Get the recommended models (features already selected in outlier analysis)
       const recommendedData = await recommendTask();
 
       setModels(recommendedData.available_models);
