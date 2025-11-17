@@ -33,11 +33,18 @@ export const OutlierAnalysisSection = ({
 }: OutlierAnalysisSectionProps) => {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
-          Outlier Analysis
-        </h3>
-        <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-portage-400 font-tanker text-2xl sm:text-3xl opacity-60">03</span>
+          <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
+            Outlier Analysis
+          </h3>
+          <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+        </div>
+
+        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+          Configure outlier detection and data cleaning. Enable KNN imputation to handle missing values and detect anomalies using IQR method.
+        </p>
       </div>
 
       {/* Configuration Panel */}

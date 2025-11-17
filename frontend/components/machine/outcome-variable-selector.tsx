@@ -57,11 +57,18 @@ export const OutcomeVariableSelector = ({
 
   return (
     <div className="flex flex-col gap-3 overflow-hidden">
-      <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
-          Outcome Variable
-        </h3>
-        <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-portage-400 font-tanker text-2xl sm:text-3xl opacity-60">01</span>
+          <h3 className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.2em]">
+            Target Variable
+          </h3>
+          <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+        </div>
+
+        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+          Select the variable you want to predict. This is the outcome your model will learn to forecast based on the predictor variables.
+        </p>
       </div>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -69,8 +76,11 @@ export const OutcomeVariableSelector = ({
           <button
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between text-left font-space-grotesk text-portage-200 hover:text-portage-100 transition-colors flex items-center gap-2 group"
+            className="relative w-full justify-between text-left font-space-grotesk text-portage-200 hover:text-portage-100 transition-all flex items-center gap-2 group cursor-pointer px-4 py-3 overflow-hidden border border-portage-500/20 hover:border-portage-400/40 bg-gradient-to-r from-woodsmoke-950/40 via-woodsmoke-950/60 to-woodsmoke-950/40 hover:from-portage-500/10 hover:via-portage-400/20 hover:to-portage-500/10"
           >
+            {/* Energy glow on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/20 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer pointer-events-none" />
+
             {/* Glitch effect with layered text */}
             <div className="relative text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-tanker tracking-wide">
               {outcomeVariable ? (
@@ -130,7 +140,7 @@ export const OutcomeVariableSelector = ({
                   </span>
                 </>
               ) : (
-                <span>Select outcome variable...</span>
+                <span>Select target variable...</span>
               )}
             </div>
             <ChevronsUpDown className="ml-2 h-5 w-5 shrink-0 text-portage-400 group-hover:text-portage-300 transition-colors" />
@@ -245,6 +255,19 @@ export const OutcomeVariableSelector = ({
             var(--color-portage-400)
           );
           box-shadow: 0 0 0.5rem rgba(137, 166, 251, 0.4);
+        }
+
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        :global(.animate-shimmer) {
+          animation: shimmer 2s ease-in-out infinite;
         }
       `}</style>
     </div>

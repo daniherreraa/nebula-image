@@ -43,6 +43,7 @@ export const PredictorPanel = ({
         onClick={() => setPredictorsPanelOpen(!predictorsPanelOpen)}
         className="flex items-center gap-3 group cursor-pointer"
       >
+        <span className="text-portage-400 font-tanker text-2xl sm:text-3xl opacity-60">02</span>
         <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em] group-hover:text-portage-200 transition-colors">
           Predictor Panel
         </h3>
@@ -90,6 +91,11 @@ export const PredictorPanel = ({
           <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
 
           <div className="relative p-6 min-h-[120px] max-h-[180px] flex flex-col gap-4 overflow-y-auto hextech-scroll">
+            {/* Explanatory text */}
+            <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+              Click on any variable to remove it from the predictor selection. These are the features your model will use to make predictions.
+            </p>
+
             {/* Predictor cards grid */}
             <div className="flex flex-wrap gap-3">
               {predictors.map((predictor) => (

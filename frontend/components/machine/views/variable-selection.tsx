@@ -35,7 +35,7 @@ const VariableSelection = () => {
     setIsSavingModel
   } = useModel();
 
-  const [outcomeVariable, setOutcomeVariable] = useState<string>(trainingConfig?.outcomeVariable || "");
+  const [targetVariable, setTargetVariable] = useState<string>(trainingConfig?.targetVariable || trainingConfig?.outcomeVariable || "");
   const [predictors, setPredictors] = useState<string[]>(trainingConfig?.predictors || []);
   const [hasAnalyzedOutliers, setHasAnalyzedOutliers] = useState(false);
   const [cleanData, setCleanData] = useState(true);
@@ -97,7 +97,7 @@ const VariableSelection = () => {
       // Step 1: Select features and label
       await selectFeatures({
         features: predictors,
-        label: outcomeVariable,
+        label: targetVariable,
       });
 
       // Step 2: Analyze and clean outliers FIRST (on original data)
@@ -127,7 +127,8 @@ const VariableSelection = () => {
 
     // Save training configuration to context
     setTrainingConfig({
-      outcomeVariable,
+      targetVariable,
+      outcomeVariable: targetVariable, // for backward compatibility
       predictors,
       selectedModel,
       handleOutliers: cleanData // keeping for compatibility
@@ -225,7 +226,8 @@ const VariableSelection = () => {
             },
             correlation_data: correlationData,
             variable_selection: {
-              outcome_variable: outcomeVariable,
+              target_variable: targetVariable,
+              outcome_variable: targetVariable, // for backward compatibility
               predictor_variables: predictors
             },
             training_config: {
@@ -294,11 +296,11 @@ const VariableSelection = () => {
 
   const availableColumns = dataset?.column_names || [];
   const availablePredictors = availableColumns.filter(
-    (col) => col !== outcomeVariable && !predictors.includes(col)
+    (col) => col !== targetVariable && !predictors.includes(col)
   );
 
-  const handleOutcomeSelect = (value: string) => {
-    setOutcomeVariable(value);
+  const handleTargetSelect = (value: string) => {
+    setTargetVariable(value);
     // Auto-populate all other columns as predictors
     const otherColumns = availableColumns.filter((col) => col !== value);
     setPredictors(otherColumns);
@@ -314,14 +316,14 @@ const VariableSelection = () => {
     setPredictors(predictors.filter((p) => p !== value));
   };
 
-  // Smooth scroll when outcome variable is selected (predictors panel appears)
+  // Smooth scroll when target variable is selected (predictors panel appears)
   useEffect(() => {
-    if (outcomeVariable && predictorsSectionRef.current) {
+    if (targetVariable && predictorsSectionRef.current) {
       setTimeout(() => {
         predictorsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 100);
     }
-  }, [outcomeVariable]);
+  }, [targetVariable]);
 
   // Smooth scroll when outliers section appears
   useEffect(() => {
@@ -374,15 +376,15 @@ const VariableSelection = () => {
 
   return (
     <div className="h-full flex flex-col gap-6 py-6">
-      {/* Outcome Variable Selector */}
+      {/* Target Variable Selector */}
       <OutcomeVariableSelector
-        outcomeVariable={outcomeVariable}
+        outcomeVariable={targetVariable}
         availableColumns={availableColumns}
-        onSelect={handleOutcomeSelect}
+        onSelect={handleTargetSelect}
       />
 
-      {/* Predictors Panel - Only show if outcome variable is selected */}
-      {outcomeVariable && (
+      {/* Predictors Panel - Only show if target variable is selected */}
+      {targetVariable && (
         <div ref={predictorsSectionRef}>
           <PredictorPanel
             predictors={predictors}
@@ -393,8 +395,8 @@ const VariableSelection = () => {
         </div>
       )}
 
-      {/* Outlier Analysis Section - Only show if outcome and predictors are set */}
-      {outcomeVariable && predictors.length > 0 && (
+      {/* Outlier Analysis Section - Only show if target and predictors are set */}
+      {targetVariable && predictors.length > 0 && (
         <div ref={outliersSectionRef}>
           <OutlierAnalysisSection
             cleanData={cleanData}
@@ -413,7 +415,7 @@ const VariableSelection = () => {
       {hasAnalyzedOutliers && recommendedModels && (
         <div ref={modelsSectionRef}>
           <ModelSelection
-            outcomeVariable={outcomeVariable}
+            targetVariable={targetVariable}
             predictors={predictors}
             selectedModel={selectedModel}
             onModelSelect={handleModelSelect}
@@ -425,11 +427,18 @@ const VariableSelection = () => {
       {selectedModel && hasAnalyzedOutliers && (
         <div ref={trainingSectionRef}>
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
-                Start Training
-              </h3>
-              <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-portage-400 font-tanker text-2xl sm:text-3xl opacity-60">05</span>
+                <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
+                  Start Training
+                </h3>
+                <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+              </div>
+
+              <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+                Ready to train your model. Click below to begin the training process with your selected configuration.
+              </p>
             </div>
 
             {/* Start Training Button */}

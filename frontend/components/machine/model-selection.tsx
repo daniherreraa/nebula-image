@@ -6,14 +6,14 @@ import { selectFeatures, recommendTask } from "@/lib/api";
 import type { ModelInfo } from "@/lib/types";
 
 interface ModelSelectionProps {
-  outcomeVariable: string;
+  targetVariable: string;
   predictors: string[];
   selectedModel: string | null;
   onModelSelect: (modelId: string) => void;
 }
 
 export const ModelSelection = ({
-  outcomeVariable,
+  targetVariable,
   predictors,
   selectedModel,
   onModelSelect,
@@ -49,11 +49,18 @@ export const ModelSelection = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
-          Model Selection
-        </h3>
-        <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-portage-400 font-tanker text-2xl sm:text-3xl opacity-60">04</span>
+          <h3 className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.2em]">
+            Model Selection
+          </h3>
+          <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
+        </div>
+
+        <p className="text-woodsmoke-100 font-space-grotesk text-[0.7rem] leading-relaxed">
+          View AI-recommended models based on your data characteristics. Each model is optimized for specific prediction tasks.
+        </p>
       </div>
 
       {!showModels ? (
