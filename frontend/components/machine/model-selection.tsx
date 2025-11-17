@@ -67,11 +67,6 @@ export const ModelSelection = ({
             {/* Hextech glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
 
-            {/* Energy Wave Animation */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-portage-400/30 to-transparent animate-energy-wave" />
-            </div>
-
             <div className="relative px-5 py-3 flex items-center justify-center gap-2">
               {isLoading && <Loader2 className="w-4 h-4 animate-spin text-portage-400" />}
               <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
@@ -79,21 +74,6 @@ export const ModelSelection = ({
               </span>
             </div>
           </button>
-
-          <style jsx>{`
-            @keyframes energy-wave {
-              0% {
-                transform: translateX(-100%);
-              }
-              100% {
-                transform: translateX(100%);
-              }
-            }
-
-            :global(.animate-energy-wave) {
-              animation: energy-wave 1.5s ease-in-out infinite;
-            }
-          `}</style>
 
           {error && (
             <p className="text-red-400 font-space-grotesk text-xs text-center">
@@ -156,6 +136,13 @@ export const ModelSelection = ({
                 {/* Hextech glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
+                {/* Energy Wave Animation - only on selected model */}
+                {selectedModel === model.model_type && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-portage-400/30 to-transparent animate-energy-wave" />
+                  </div>
+                )}
+
                 {/* Selected indicator bar */}
                 {selectedModel === model.model_type && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-portage-400" />
@@ -175,6 +162,21 @@ export const ModelSelection = ({
           </div>
         </>
       )}
+
+      <style jsx>{`
+        @keyframes energy-wave {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        :global(.animate-energy-wave) {
+          animation: energy-wave 1.5s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

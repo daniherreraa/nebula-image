@@ -1,7 +1,7 @@
 // components/machine/views/results.tsx
 "use client";
 import { useState, useMemo } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Info } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
 import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useModel } from "@/app/context";
@@ -49,12 +49,13 @@ interface MetricCardProps {
   label: string;
   value: number;
   description?: string;
+  infoUrl?: string;
 }
 
-function MetricCard({ label, value, description }: MetricCardProps) {
+function MetricCard({ label, value, description, infoUrl }: MetricCardProps) {
   return (
-    <div className="relative group">
-      {/* Hextech corners like predictor cards */}
+    <div className="relative group w-full">
+      {/* Hextech corners */}
       <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
       <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
       <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -64,18 +65,36 @@ function MetricCard({ label, value, description }: MetricCardProps) {
         {/* Hextech glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
 
-        <div className="relative p-3 sm:p-4 md:p-6">
-          <div className="text-portage-400/70 text-[10px] sm:text-xs font-space-grotesk font-medium mb-1 sm:mb-2 uppercase tracking-[0.15em] sm:tracking-[0.2em]">
-            {label}
-          </div>
-          <div className="text-portage-200 text-2xl sm:text-3xl md:text-4xl font-tanker tabular-nums">
-            {typeof value === 'number' ? value.toFixed(2) : value}
-          </div>
-          {description && (
-            <div className="text-woodsmoke-100 text-[0.65rem] sm:text-xs font-space-grotesk mt-2 leading-relaxed opacity-80">
-              {description}
+        <div className="relative p-4 flex items-start gap-4">
+          {/* Left side - Title and Description */}
+          <div className="flex-1 flex flex-col gap-1">
+            <div className="text-portage-400/70 text-xs font-space-grotesk font-medium uppercase tracking-[0.2em]">
+              {label}
             </div>
-          )}
+            {description && (
+              <div className="text-woodsmoke-100 text-sm font-space-grotesk leading-relaxed">
+                {description}
+              </div>
+            )}
+          </div>
+
+          {/* Right side - Value and Info Button */}
+          <div className="flex items-start gap-3">
+            {infoUrl && (
+              <a
+                href={infoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-portage-400 hover:text-portage-300 transition-colors"
+                title="Learn more"
+              >
+                <Info className="w-4 h-4" />
+              </a>
+            )}
+            <div className="text-portage-200 text-3xl md:text-4xl font-tanker tabular-nums">
+              {typeof value === 'number' ? value.toFixed(2) : value}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -232,13 +251,14 @@ const Results = () => {
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
       </div>
 
-      {/* Fila de métricas */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+      {/* Metrics - Full width stacked layout */}
+      <div className="flex flex-col gap-3">
         {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
           <MetricCard
             label="R²"
             value={metrics.r2_score}
             description="Coefficient of Determination. Measures how well predictions fit actual values (0-1, higher is better)."
+            infoUrl="https://en.wikipedia.org/wiki/Coefficient_of_determination"
           />
         )}
         {(metrics.accuracy !== undefined && metrics.accuracy !== null) && (
@@ -246,6 +266,7 @@ const Results = () => {
             label="Accuracy"
             value={metrics.accuracy}
             description="Percentage of correct predictions. Shows overall model correctness (0-1, higher is better)."
+            infoUrl="https://en.wikipedia.org/wiki/Accuracy_and_precision"
           />
         )}
         {(metrics.mse !== undefined && metrics.mse !== null) && (
@@ -253,6 +274,7 @@ const Results = () => {
             label="MSE"
             value={metrics.mse}
             description="Mean Squared Error. Average of squared differences between predictions and actual values (lower is better)."
+            infoUrl="https://en.wikipedia.org/wiki/Mean_squared_error"
           />
         )}
         {(metrics.rmse !== undefined && metrics.rmse !== null) && (
@@ -260,6 +282,7 @@ const Results = () => {
             label="RMSE"
             value={metrics.rmse}
             description="Root Mean Squared Error. Square root of MSE, in original units. Penalizes large errors (lower is better)."
+            infoUrl="https://en.wikipedia.org/wiki/Root-mean-square_deviation"
           />
         )}
         {(metrics.mae !== undefined && metrics.mae !== null) && (
@@ -267,38 +290,39 @@ const Results = () => {
             label="MAE"
             value={metrics.mae}
             description="Mean Absolute Error. Average absolute difference between predictions and actual values (lower is better)."
+            infoUrl="https://en.wikipedia.org/wiki/Mean_absolute_error"
           />
         )}
+      </div>
 
-        {/* Botón Download Model */}
-        <div className="relative group col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-1">
-          <button
-            onClick={handleDownload}
-            disabled={isDownloading}
-            className="relative group overflow-hidden w-full h-full bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {/* Hextech corners */}
-            <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-            <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+      {/* Download Model Button - Separate */}
+      <div className="relative group w-full">
+        <button
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className="relative group overflow-hidden w-full bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {/* Hextech corners */}
+          <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
 
-            {/* Background glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-            {/* Button content */}
-            <div className="relative px-3 py-3 sm:px-4 sm:py-4 md:py-6 flex items-center justify-center gap-2">
-              {isDownloading ? (
-                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-portage-400 animate-spin" />
-              ) : (
-                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
-              )}
-              <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.15em] group-hover:text-portage-200 transition-colors">
-                {isDownloading ? "Downloading..." : "Download"}
-              </span>
-            </div>
-          </button>
-        </div>
+          {/* Button content */}
+          <div className="relative px-4 py-3 flex items-center justify-center gap-2">
+            {isDownloading ? (
+              <Loader2 className="w-4 h-4 text-portage-400 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+            )}
+            <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+              {isDownloading ? "Downloading..." : "Download Model"}
+            </span>
+          </div>
+        </button>
       </div>
 
       {/* Fila de gráficas */}
