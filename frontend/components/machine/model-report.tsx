@@ -365,13 +365,102 @@ const ModelReport = ({ modelData }: ModelReportProps) => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="p-4 border-t border-portage-500/20">
-                  <p className="text-portage-400/70 font-space-grotesk text-sm">
-                    Correlation data available (display component to be implemented)
+                <div className="p-4 border-t border-portage-500/20 space-y-4">
+                  <p className="text-woodsmoke-100 font-space-grotesk text-sm leading-relaxed">
+                    Correlation matrix showing relationships between variables. Values range from -1 (negative correlation) to +1 (positive correlation).
                   </p>
+
+                  {/* Correlation Matrix Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr>
+                          <th className="sticky left-0 bg-woodsmoke-950/90 backdrop-blur-sm p-2 text-left border border-portage-500/20">
+                            <span className="text-portage-400 font-space-grotesk text-xs font-semibold uppercase tracking-wider">
+                              Variable
+                            </span>
+                          </th>
+                          {modelData.correlation_data!.columns.map((col, idx) => (
+                            <th
+                              key={idx}
+                              className="p-2 text-left border border-portage-500/20 min-w-[100px]"
+                            >
+                              <span className="text-portage-400 font-space-grotesk text-xs font-semibold uppercase tracking-wider">
+                                {col}
+                              </span>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {modelData.correlation_data!.correlations.map((row, rowIdx) => (
+                          <tr key={rowIdx} className="hover:bg-portage-500/5 transition-colors">
+                            <td className="sticky left-0 bg-woodsmoke-950/90 backdrop-blur-sm p-2 border border-portage-500/20">
+                              <span className="text-portage-300 font-space-grotesk text-sm font-medium">
+                                {modelData.correlation_data!.columns[rowIdx]}
+                              </span>
+                            </td>
+                            {row.map((value, colIdx) => {
+                              const absValue = Math.abs(value);
+                              const isStrong = absValue > 0.7;
+                              const isModerate = absValue > 0.4 && absValue <= 0.7;
+                              const bgColor = isStrong
+                                ? value > 0
+                                  ? "bg-portage-500/30"
+                                  : "bg-carnation-500/30"
+                                : isModerate
+                                ? value > 0
+                                  ? "bg-portage-500/15"
+                                  : "bg-carnation-500/15"
+                                : "bg-transparent";
+
+                              return (
+                                <td
+                                  key={colIdx}
+                                  className={`p-2 border border-portage-500/20 text-center ${bgColor} transition-colors`}
+                                >
+                                  <span className="text-woodsmoke-100 font-mono text-sm">
+                                    {value.toFixed(3)}
+                                  </span>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex flex-wrap items-center gap-4 pt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-portage-500/30 border border-portage-500/40" />
+                      <span className="text-woodsmoke-100 font-space-grotesk text-xs">
+                        Strong Positive (&gt;0.7)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-portage-500/15 border border-portage-500/30" />
+                      <span className="text-woodsmoke-100 font-space-grotesk text-xs">
+                        Moderate Positive (0.4-0.7)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-carnation-500/15 border border-carnation-500/30" />
+                      <span className="text-woodsmoke-100 font-space-grotesk text-xs">
+                        Moderate Negative (-0.4 to -0.7)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-carnation-500/30 border border-carnation-500/40" />
+                      <span className="text-woodsmoke-100 font-space-grotesk text-xs">
+                        Strong Negative (&lt;-0.7)
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
