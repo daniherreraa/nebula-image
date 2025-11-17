@@ -73,6 +73,11 @@ export const ModelSelection = ({
             {/* Hextech glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
 
+            {/* Energy Wave Animation */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-portage-400/30 to-transparent animate-energy-wave" />
+            </div>
+
             <div className="relative px-5 py-3 flex items-center justify-center gap-2">
               {isLoading && <Loader2 className="w-4 h-4 animate-spin text-portage-400" />}
               <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
@@ -81,6 +86,21 @@ export const ModelSelection = ({
             </div>
           </button>
 
+          <style jsx>{`
+            @keyframes energy-wave {
+              0% {
+                transform: translateX(-100%);
+              }
+              100% {
+                transform: translateX(100%);
+              }
+            }
+
+            :global(.animate-energy-wave) {
+              animation: energy-wave 1.5s ease-in-out infinite;
+            }
+          `}</style>
+
           {error && (
             <p className="text-red-400 font-space-grotesk text-xs text-center">
               {error}
@@ -88,8 +108,41 @@ export const ModelSelection = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {models.map((model) => (
+        <>
+          {/* Mobile: Dropdown Select */}
+          <div className="block md:hidden">
+            <select
+              value={selectedModel || ""}
+              onChange={(e) => onModelSelect(e.target.value)}
+              className="w-full px-4 py-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 text-portage-200 font-space-grotesk text-sm focus:border-portage-400/40 focus:ring-1 focus:ring-portage-500/50 focus:outline-none transition-colors rounded-md"
+            >
+              <option value="" disabled className="bg-woodsmoke-950 text-portage-400">
+                Select a model...
+              </option>
+              {models.map((model) => (
+                <option
+                  key={model.model_type}
+                  value={model.model_type}
+                  className="bg-woodsmoke-950 text-portage-200"
+                >
+                  {model.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Selected model description on mobile */}
+            {selectedModel && (
+              <div className="mt-3 p-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20">
+                <p className="text-portage-400/70 font-space-grotesk text-xs leading-relaxed">
+                  {models.find(m => m.model_type === selectedModel)?.description}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Grid of Cards */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {models.map((model) => (
             <button
               key={model.model_type}
               onClick={() => onModelSelect(model.model_type)}
@@ -125,7 +178,8 @@ export const ModelSelection = ({
               </div>
             </button>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

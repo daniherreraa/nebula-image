@@ -25,10 +25,15 @@ export default function FloatingStepNav({
   const [leaving, setLeaving] = useState<string | null>(null);
   const { modelResults } = useModel();
 
+  // Get next available step
+  const currentIndex = steps.findIndex(s => s.id === currentStep);
+  const nextStep = steps[currentIndex + 1];
+  const canGoNext = nextStep && !(nextStep.id === "results" && !modelResults);
+
   return (
-    <div className="fixed md:absolute bottom-0 left-0 right-0 md:right-auto w-full md:w-auto flex justify-center md:justify-start pb-safe z-50 md:z-auto">
-      {/* Mobile: Full width toolbar with padding */}
-      <div className="w-full md:w-auto px-4 pb-4 md:px-0 md:pb-6 md:pl-4">
+    <div className="fixed md:absolute bottom-0 left-0 right-0 md:right-auto w-full md:w-auto flex flex-col items-center md:items-start pb-safe z-50 md:z-auto gap-2">
+      {/* Navigation Panel */}
+      <div className="w-full md:w-auto px-4 md:px-0 md:pl-4">
         <motion.div
           layout
           transition={{
@@ -210,6 +215,20 @@ export default function FloatingStepNav({
           );
         })}
         </motion.div>
+      </div>
+
+      {/* Helper Text - Below navigation panel */}
+      <div className="px-4 pb-4 md:px-0 md:pb-0 md:pl-4">
+        <motion.p
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-woodsmoke-100 md:text-woodsmoke-500 font-space-grotesk text-[0.65rem] text-center md:text-left max-w-xs"
+        >
+          {currentStep === "preview" && "Review your dataset structure and preview the data"}
+          {currentStep === "summary" && "Explore correlations and statistical summaries"}
+          {currentStep === "train" && "Configure and train your machine learning model"}
+          {currentStep === "results" && "Analyze model performance and predictions"}
+        </motion.p>
       </div>
     </div>
   );
