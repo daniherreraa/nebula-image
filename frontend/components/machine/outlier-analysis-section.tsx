@@ -56,12 +56,12 @@ export const OutlierAnalysisSection = ({
       </div>
 
       {/* Enable Data Cleaning Card - Expandable */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm">
+      <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-400/30 backdrop-blur-sm transition-all duration-300">
         <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5" />
 
         <div className="relative px-4 sm:px-5 py-4 flex flex-col gap-4">
           {/* Enable Data Cleaning Toggle */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between h-10">
             <span className="text-portage-300 font-space-grotesk text-sm">
               Enable Data Cleaning?
             </span>
@@ -155,7 +155,7 @@ export const OutlierAnalysisSection = ({
                 <button
                   onClick={onAnalyze}
                   disabled={isAnalyzing}
-                  className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                  className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-10"
                 >
                   {/* Hextech corners */}
                   <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -192,7 +192,7 @@ export const OutlierAnalysisSection = ({
         <button
           onClick={onAnalyze}
           disabled={isAnalyzing}
-          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-10"
         >
           {/* Hextech corners */}
           <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -204,7 +204,7 @@ export const OutlierAnalysisSection = ({
           <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Button content */}
-          <div className="relative px-6 py-3 flex items-center justify-center gap-3">
+          <div className="relative px-6 h-full flex items-center justify-center gap-3">
             {isAnalyzing ? (
               <Loader2 className="w-4 h-4 text-portage-400 animate-spin" />
             ) : (

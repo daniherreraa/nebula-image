@@ -13,9 +13,10 @@ import { useRouter } from "next/navigation";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { clearDataset, currentView, setCurrentView, dataset } = useModel();
+  const { clearDataset, currentView, setCurrentView, dataset, modelResults } = useModel();
   const { themeColor } = useErrorTheme();
   const router = useRouter();
+  const hasResults = !!modelResults && !!modelResults.metrics;
 
   const handleNewModel = () => {
     clearDataset();
@@ -166,7 +167,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
               {/* Results */}
               <button
-                onClick={() => setCurrentView("results")}
+                onClick={() => hasResults && setCurrentView("results")}
+                disabled={!hasResults}
                 className="flex flex-col items-center gap-1 transition-all duration-300 group"
               >
                 <div className={`relative w-16 h-8 flex items-center justify-center transition-all duration-300 ${
@@ -184,11 +186,19 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     </>
                   )}
                   <TrendingUp className={`w-5 h-5 transition-colors ${
-                    currentView === "results" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                    currentView === "results"
+                      ? "text-portage-300"
+                      : hasResults
+                      ? "text-portage-400/60 group-hover:text-portage-300"
+                      : "text-portage-400/30"
                   }`} />
                 </div>
                 <span className={`font-space-grotesk text-xs uppercase tracking-wider transition-colors ${
-                  currentView === "results" ? "text-portage-300" : "text-portage-400/60 group-hover:text-portage-300"
+                  currentView === "results"
+                    ? "text-portage-300"
+                    : hasResults
+                    ? "text-portage-400/60 group-hover:text-portage-300"
+                    : "text-portage-400/30"
                 }`}>Results</span>
               </button>
             </div>

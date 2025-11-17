@@ -9,43 +9,7 @@ import { getClientApiUrl } from "@/lib/config";
 import { CustomChartTooltip } from "@/components/machine/custom-chart-tooltip";
 import { toast } from "sonner";
 
-// Mock data - será reemplazado con datos reales del modelo
-const mockPredictionsData = [
-  { actual: 100, predicted: 105 },
-  { actual: 150, predicted: 145 },
-  { actual: 200, predicted: 210 },
-  { actual: 250, predicted: 240 },
-  { actual: 300, predicted: 305 },
-  { actual: 350, predicted: 340 },
-  { actual: 400, predicted: 410 },
-  { actual: 450, predicted: 445 },
-  { actual: 500, predicted: 495 },
-  { actual: 180, predicted: 175 },
-  { actual: 220, predicted: 230 },
-  { actual: 380, predicted: 375 },
-  { actual: 420, predicted: 430 },
-  { actual: 280, predicted: 275 },
-  { actual: 320, predicted: 330 },
-];
-
-const mockImportanceData = [
-  { index: 0, importance: 2.1, name: "Feature 0" },
-  { index: 1, importance: 5.8, name: "Feature 1" },
-  { index: 2, importance: 4.9, name: "Feature 2" },
-  { index: 3, importance: 3.7, name: "Feature 3" },
-  { index: 4, importance: 5.2, name: "Feature 4" },
-  { index: 5, importance: 1.3, name: "Feature 5" },
-  { index: 6, importance: 4.1, name: "Feature 6" },
-  { index: 7, importance: 3.2, name: "Feature 7" },
-];
-
-const mockMetrics = {
-  r2_score: 0.89,
-  accuracy: 0.89,
-  mse: 65.2,
-  rmse: 8.07,
-  mae: 6.45
-};
+// No mock data - only use real model results
 
 interface MetricCardProps {
   label: string;
@@ -143,13 +107,15 @@ const Results = () => {
   const { trainingConfig, modelResults, setCurrentView } = useModel();
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Use context data or fallback to mock data
-  const selectedModel = trainingConfig?.selectedModel || "Random Forest";
-  const metrics = modelResults?.metrics || mockMetrics;
+  // Only use real data from model results
+  const selectedModel = trainingConfig?.selectedModel || "Unknown Model";
+  const metrics = modelResults?.metrics;
+  const hasResults = !!modelResults && !!metrics;
 
   // Sort predictions data by actual value to ensure proper X-axis ordering
   const predictionsData = useMemo(() => {
-    const data = modelResults?.predictions || mockPredictionsData;
+    if (!modelResults?.predictions) return [];
+    const data = modelResults.predictions;
     return [...data].sort((a, b) => a.actual - b.actual);
   }, [modelResults?.predictions]);
 
@@ -163,9 +129,10 @@ const Results = () => {
 
   // Transform feature importance data for the bar chart
   // Sort by importance in descending order (highest to lowest)
-  const importanceData = modelResults?.featureImportance
-    ? [...modelResults.featureImportance].sort((a, b) => b.importance - a.importance)
-    : mockImportanceData;
+  const importanceData = useMemo(() => {
+    if (!modelResults?.featureImportance) return null;
+    return [...modelResults.featureImportance].sort((a, b) => b.importance - a.importance);
+  }, [modelResults?.featureImportance]);
 
   // Format model name with special characters having reduced opacity
   const formatModelName = (name: string) => {
@@ -263,25 +230,57 @@ const Results = () => {
 
   // Metrics in a row - filter only available ones
   const availableMetrics = [
-    metrics.mse !== undefined && metrics.mse !== null && {
+    metrics?.mse !== undefined && metrics?.mse !== null && {
       label: "MSE",
       value: metrics.mse,
       description: "Mean Squared Error. Average of squared differences (lower is better).",
       infoUrl: "https://en.wikipedia.org/wiki/Mean_squared_error"
     },
-    metrics.rmse !== undefined && metrics.rmse !== null && {
+    metrics?.rmse !== undefined && metrics?.rmse !== null && {
       label: "RMSE",
       value: metrics.rmse,
       description: "Root Mean Squared Error. Square root of MSE in original units (lower is better).",
       infoUrl: "https://en.wikipedia.org/wiki/Root-mean-square_deviation"
     },
-    metrics.mae !== undefined && metrics.mae !== null && {
+    metrics?.mae !== undefined && metrics?.mae !== null && {
       label: "MAE",
       value: metrics.mae,
       description: "Mean Absolute Error. Average absolute difference (lower is better).",
       infoUrl: "https://en.wikipedia.org/wiki/Mean_absolute_error"
     },
   ].filter(Boolean) as MetricCardProps[];
+
+  // Prevent access to results view if no real results exist
+  if (!hasResults) {
+    return (
+      <div className="h-full flex items-center justify-center animate-fadeIn">
+        <div className="text-center max-w-md">
+          <Info className="w-16 h-16 text-portage-400/60 mx-auto mb-4 animate-pulse" />
+          <h3 className="text-portage-300 font-tanker text-2xl mb-3">
+            No Results Available
+          </h3>
+          <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed mb-6">
+            Train a model first to see results here. Go to the Variable Selection tab to configure and train your model.
+          </p>
+          <button
+            onClick={() => setCurrentView("selection")}
+            className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 cursor-pointer"
+          >
+            <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative px-6 py-3 flex items-center justify-center gap-2">
+              <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+                Go to Variable Selection
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col gap-6 py-6">
@@ -402,15 +401,15 @@ const Results = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
               <XAxis
                 dataKey="actual"
-                stroke="rgb(250, 250, 250)"
-                tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(231, 231, 231)"
+                tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <YAxis
                 dataKey="predicted"
-                stroke="rgb(250, 250, 250)"
-                tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(231, 231, 231)"
+                tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Scatter data={predictionsData} fill="rgb(96, 123, 244)" />
@@ -418,13 +417,13 @@ const Results = () => {
           </ChartContainer>
         </ChartCard>
 
-        {/* Feature Importance - 60% (3 columns) - Only show if data exists */}
-        {importanceData && importanceData.length > 0 && (
-          <ChartCard
-            title="Feature Importance"
-            description="Variables ranked by their influence on predictions. Higher values indicate features that contribute more to the model's decisions."
-            className="lg:col-span-3"
-          >
+        {/* Feature Importance - 60% (3 columns) - Always show */}
+        <ChartCard
+          title="Feature Importance"
+          description="Variables ranked by their influence on predictions. Higher values indicate features that contribute more to the model's decisions."
+          className="lg:col-span-3"
+        >
+          {importanceData && importanceData.length > 0 ? (
             <ChartContainer config={barChartConfig} className="h-[350px] w-full">
               <BarChart data={importanceData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                 <defs>
@@ -441,14 +440,14 @@ const Results = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
                 <XAxis
                   dataKey="name"
-                  stroke="rgb(250, 250, 250)"
-                  tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="rgb(231, 231, 231)"
+                  tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <YAxis
-                  stroke="rgb(250, 250, 250)"
-                  tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="rgb(231, 231, 231)"
+                  tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <Tooltip content={<CustomChartTooltip />} />
                 <Bar
@@ -461,8 +460,20 @@ const Results = () => {
                 />
               </BarChart>
             </ChartContainer>
-          </ChartCard>
-        )}
+          ) : (
+            <div className="h-[350px] w-full flex items-center justify-center">
+              <div className="text-center">
+                <Info className="w-12 h-12 text-portage-400/60 mx-auto mb-3" />
+                <p className="text-portage-300 font-space-grotesk text-base">
+                  There's no information about variable importance
+                </p>
+                <p className="text-woodsmoke-100 font-space-grotesk text-sm mt-2 max-w-md">
+                  This model type doesn't provide feature importance scores, or the data wasn't available during training.
+                </p>
+              </div>
+            </div>
+          )}
+        </ChartCard>
       </div>
 
       {/* Second Row: Error Chart + Training Parameters */}
@@ -484,14 +495,14 @@ const Results = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
               <XAxis
                 dataKey="index"
-                stroke="rgb(250, 250, 250)"
-                tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Sample", position: "insideBottom", offset: -5, fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(231, 231, 231)"
+                tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Sample", position: "insideBottom", offset: -5, fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <YAxis
-                stroke="rgb(250, 250, 250)"
-                tick={{ fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Error", angle: -90, position: "insideLeft", fill: "rgb(250, 250, 250)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(231, 231, 231)"
+                tick={{ fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Error", angle: -90, position: "insideLeft", fill: "rgb(231, 231, 231)", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Line

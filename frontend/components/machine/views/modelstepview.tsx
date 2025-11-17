@@ -13,8 +13,9 @@ interface ModelStepViewProps {
 }
 
 const ModelStepView = ({ modelId }: ModelStepViewProps) => {
-  const { modelId: contextModelId, dataset, isLoading, currentView, setCurrentView } = useModel();
+  const { modelId: contextModelId, dataset, isLoading, currentView, setCurrentView, modelResults } = useModel();
   const router = useRouter();
+  const hasResults = !!modelResults && !!modelResults.metrics;
 
   useEffect(() => {
     console.log("URL modelId:", modelId);
@@ -174,12 +175,16 @@ const ModelStepView = ({ modelId }: ModelStepViewProps) => {
               <div className="w-px h-5 bg-portage-500/30" />
 
               <button
-                onClick={() => setCurrentView("results")}
+                onClick={() => hasResults && setCurrentView("results")}
+                disabled={!hasResults}
                 className={`relative px-4 h-full flex items-center transition-all duration-300 ${
                   currentView === "results"
                     ? "text-portage-300"
-                    : "text-portage-400/70 hover:text-portage-300"
+                    : hasResults
+                    ? "text-portage-400/70 hover:text-portage-300 cursor-pointer"
+                    : "text-portage-400/30 cursor-not-allowed"
                 }`}
+                title={!hasResults ? "Train a model first to see results" : ""}
               >
                 <TrendingUp className="w-4 h-4" />
                 <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-portage-400 transition-transform duration-300 ${
