@@ -1,9 +1,9 @@
 // components/machine/views/results.tsx
 "use client";
 import { useState, useMemo } from "react";
-import { Download, Loader2, Info } from "lucide-react";
+import { Download, Loader2, Info, Plus } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
-import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { ScatterChart, Scatter, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useModel } from "@/app/context";
 import { getClientApiUrl } from "@/lib/config";
 import { CustomChartTooltip } from "@/components/machine/custom-chart-tooltip";
@@ -42,7 +42,9 @@ const mockImportanceData = [
 const mockMetrics = {
   r2_score: 0.89,
   accuracy: 0.89,
-  mse: 65.2
+  mse: 65.2,
+  rmse: 8.07,
+  mae: 6.45
 };
 
 interface MetricCardProps {
@@ -54,7 +56,7 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, description, infoUrl }: MetricCardProps) {
   return (
-    <div className="relative group w-full">
+    <div className="relative group">
       {/* Hextech corners */}
       <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
       <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -65,21 +67,21 @@ function MetricCard({ label, value, description, infoUrl }: MetricCardProps) {
         {/* Hextech glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
 
-        <div className="relative p-4 flex items-start gap-4">
-          {/* Left side - Title and Description */}
-          <div className="flex-1 flex flex-col gap-1">
-            <div className="text-portage-400/70 text-xs font-space-grotesk font-medium uppercase tracking-[0.2em]">
+        <div className="relative p-3 sm:p-4 flex flex-col gap-2">
+          {/* Title and Description */}
+          <div className="flex-1">
+            <div className="text-portage-400/70 text-xs font-space-grotesk font-medium uppercase tracking-[0.2em] mb-1">
               {label}
             </div>
             {description && (
-              <div className="text-woodsmoke-100 text-sm font-space-grotesk leading-relaxed">
+              <div className="text-woodsmoke-100 text-xs font-space-grotesk leading-relaxed">
                 {description}
               </div>
             )}
           </div>
 
-          {/* Right side - Value and Info Button */}
-          <div className="flex items-start gap-3">
+          {/* Value and Info Button */}
+          <div className="flex items-center justify-between">
             {infoUrl && (
               <a
                 href={infoUrl}
@@ -91,7 +93,7 @@ function MetricCard({ label, value, description, infoUrl }: MetricCardProps) {
                 <Info className="w-4 h-4" />
               </a>
             )}
-            <div className="text-portage-200 text-3xl md:text-4xl font-tanker tabular-nums">
+            <div className="text-portage-200 text-2xl md:text-3xl font-tanker tabular-nums ml-auto">
               {typeof value === 'number' ? value.toFixed(2) : value}
             </div>
           </div>
@@ -125,7 +127,7 @@ function ChartCard({ title, description, children, className = "" }: ChartCardPr
           <h3 className="text-base sm:text-lg font-space-grotesk font-medium text-portage-300 mb-1 tracking-wide">
             {title}
           </h3>
-          <p className="text-xs font-space-grotesk text-portage-400/70 mb-3 sm:mb-4 leading-relaxed">
+          <p className="text-xs font-space-grotesk text-woodsmoke-100 mb-3 sm:mb-4 leading-relaxed">
             {description}
           </p>
           <div className="mt-3 sm:mt-4">
@@ -138,7 +140,7 @@ function ChartCard({ title, description, children, className = "" }: ChartCardPr
 }
 
 const Results = () => {
-  const { trainingConfig, modelResults } = useModel();
+  const { trainingConfig, modelResults, setCurrentView } = useModel();
   const [isDownloading, setIsDownloading] = useState(false);
 
   // Use context data or fallback to mock data
@@ -150,6 +152,14 @@ const Results = () => {
     const data = modelResults?.predictions || mockPredictionsData;
     return [...data].sort((a, b) => a.actual - b.actual);
   }, [modelResults?.predictions]);
+
+  // Calculate errors for error chart
+  const errorData = useMemo(() => {
+    return predictionsData.map((point, index) => ({
+      index: index + 1,
+      error: point.predicted - point.actual,
+    }));
+  }, [predictionsData]);
 
   // Transform feature importance data for the bar chart
   // Sort by importance in descending order (highest to lowest)
@@ -223,6 +233,13 @@ const Results = () => {
     }
   };
 
+  const handleCreateNewModel = () => {
+    // Navigate back to variable selection view
+    setCurrentView("train");
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const scatterChartConfig = {
     predicted: {
       label: "Predicted",
@@ -236,6 +253,35 @@ const Results = () => {
       color: "hsl(var(--color-portage-500))",
     },
   };
+
+  const errorChartConfig = {
+    error: {
+      label: "Error",
+      color: "hsl(var(--color-portage-500))",
+    },
+  };
+
+  // Metrics in a row - filter only available ones
+  const availableMetrics = [
+    metrics.mse !== undefined && metrics.mse !== null && {
+      label: "MSE",
+      value: metrics.mse,
+      description: "Mean Squared Error. Average of squared differences (lower is better).",
+      infoUrl: "https://en.wikipedia.org/wiki/Mean_squared_error"
+    },
+    metrics.rmse !== undefined && metrics.rmse !== null && {
+      label: "RMSE",
+      value: metrics.rmse,
+      description: "Root Mean Squared Error. Square root of MSE in original units (lower is better).",
+      infoUrl: "https://en.wikipedia.org/wiki/Root-mean-square_deviation"
+    },
+    metrics.mae !== undefined && metrics.mae !== null && {
+      label: "MAE",
+      value: metrics.mae,
+      description: "Mean Absolute Error. Average absolute difference (lower is better).",
+      infoUrl: "https://en.wikipedia.org/wiki/Mean_absolute_error"
+    },
+  ].filter(Boolean) as MetricCardProps[];
 
   return (
     <div className="h-full flex flex-col gap-6 py-6">
@@ -251,56 +297,44 @@ const Results = () => {
         <div className="h-px flex-1 bg-gradient-to-r from-portage-500/50 via-portage-400/30 to-transparent" />
       </div>
 
-      {/* Metrics - Full width stacked layout */}
-      <div className="flex flex-col gap-3">
-        {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
-          <MetricCard
-            label="R²"
-            value={metrics.r2_score}
-            description="Coefficient of Determination. Measures how well predictions fit actual values (0-1, higher is better)."
-            infoUrl="https://en.wikipedia.org/wiki/Coefficient_of_determination"
-          />
-        )}
-        {(metrics.accuracy !== undefined && metrics.accuracy !== null) && (
-          <MetricCard
-            label="Accuracy"
-            value={metrics.accuracy}
-            description="Percentage of correct predictions. Shows overall model correctness (0-1, higher is better)."
-            infoUrl="https://en.wikipedia.org/wiki/Accuracy_and_precision"
-          />
-        )}
-        {(metrics.mse !== undefined && metrics.mse !== null) && (
-          <MetricCard
-            label="MSE"
-            value={metrics.mse}
-            description="Mean Squared Error. Average of squared differences between predictions and actual values (lower is better)."
-            infoUrl="https://en.wikipedia.org/wiki/Mean_squared_error"
-          />
-        )}
-        {(metrics.rmse !== undefined && metrics.rmse !== null) && (
-          <MetricCard
-            label="RMSE"
-            value={metrics.rmse}
-            description="Root Mean Squared Error. Square root of MSE, in original units. Penalizes large errors (lower is better)."
-            infoUrl="https://en.wikipedia.org/wiki/Root-mean-square_deviation"
-          />
-        )}
-        {(metrics.mae !== undefined && metrics.mae !== null) && (
-          <MetricCard
-            label="MAE"
-            value={metrics.mae}
-            description="Mean Absolute Error. Average absolute difference between predictions and actual values (lower is better)."
-            infoUrl="https://en.wikipedia.org/wiki/Mean_absolute_error"
-          />
-        )}
-      </div>
+      {/* Metrics - In same row (max 3) */}
+      {availableMetrics.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          {availableMetrics.map((metric, idx) => (
+            <MetricCard key={idx} {...metric} />
+          ))}
+        </div>
+      )}
 
-      {/* Download Model Button - Separate */}
-      <div className="relative group w-full">
+      {/* R² and Accuracy if available */}
+      {((metrics.r2_score !== undefined && metrics.r2_score !== null) ||
+        (metrics.accuracy !== undefined && metrics.accuracy !== null)) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          {(metrics.r2_score !== undefined && metrics.r2_score !== null) && (
+            <MetricCard
+              label="R²"
+              value={metrics.r2_score}
+              description="Coefficient of Determination. How well predictions fit actual values (0-1, higher is better)."
+              infoUrl="https://en.wikipedia.org/wiki/Coefficient_of_determination"
+            />
+          )}
+          {(metrics.accuracy !== undefined && metrics.accuracy !== null) && (
+            <MetricCard
+              label="Accuracy"
+              value={metrics.accuracy}
+              description="Percentage of correct predictions. Overall model correctness (0-1, higher is better)."
+              infoUrl="https://en.wikipedia.org/wiki/Accuracy_and_precision"
+            />
+          )}
+        </div>
+      )}
+
+      {/* Download and Create New Model Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
           onClick={handleDownload}
           disabled={isDownloading}
-          className="relative group overflow-hidden w-full bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {/* Hextech corners */}
           <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
@@ -323,15 +357,37 @@ const Results = () => {
             </span>
           </div>
         </button>
+
+        <button
+          onClick={handleCreateNewModel}
+          className="relative group overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40"
+        >
+          {/* Hextech corners */}
+          <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+          {/* Background glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-portage-500/0 via-portage-400/10 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Button content */}
+          <div className="relative px-4 py-3 flex items-center justify-center gap-2">
+            <Plus className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+            <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
+              Create Another Model
+            </span>
+          </div>
+        </button>
       </div>
 
-      {/* Fila de gráficas */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 flex-1">
-        {/* Scatter Plot - 60% (3 columnas) */}
+      {/* Main Charts Row - Predictions 40%, Feature Importance 60% */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Predictions Chart - 40% (2 columns) */}
         <ChartCard
-          title="Predictions"
-          description="Model predictions vs actual values"
-          className={importanceData && importanceData.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}
+          title="Predictions vs Actual"
+          description="Comparison between model predictions and actual values. Points closer to a diagonal line indicate better predictions."
+          className="lg:col-span-2"
         >
           <ChartContainer config={scatterChartConfig} className="h-[350px] w-full">
             <ScatterChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
@@ -344,15 +400,15 @@ const Results = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
               <XAxis
                 dataKey="actual"
-                stroke="rgb(137, 166, 251)"
-                tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(237, 242, 247)"
+                tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
               />
               <YAxis
                 dataKey="predicted"
-                stroke="rgb(137, 166, 251)"
-                tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="rgb(237, 242, 247)"
+                tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Scatter data={predictionsData} fill="rgb(96, 123, 244)" />
@@ -360,12 +416,12 @@ const Results = () => {
           </ChartContainer>
         </ChartCard>
 
-        {/* Bar Chart - 40% (2 columnas) - Only show if data exists */}
+        {/* Feature Importance - 60% (3 columns) - Only show if data exists */}
         {importanceData && importanceData.length > 0 && (
           <ChartCard
             title="Feature Importance"
-            description="Most important variables for predictions"
-            className="lg:col-span-2"
+            description="Variables ranked by their influence on predictions. Higher values indicate features that contribute more to the model's decisions."
+            className="lg:col-span-3"
           >
             <ChartContainer config={barChartConfig} className="h-[350px] w-full">
               <BarChart data={importanceData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
@@ -383,14 +439,14 @@ const Results = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
                 <XAxis
                   dataKey="name"
-                  stroke="rgb(137, 166, 251)"
-                  tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="rgb(237, 242, 247)"
+                  tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <YAxis
-                  stroke="rgb(137, 166, 251)"
-                  tick={{ fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(137, 166, 251)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="rgb(237, 242, 247)"
+                  tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <Tooltip content={<CustomChartTooltip />} />
                 <Bar
@@ -405,6 +461,80 @@ const Results = () => {
             </ChartContainer>
           </ChartCard>
         )}
+      </div>
+
+      {/* Second Row: Error Chart + Training Parameters */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Error Chart - 60% (3 columns) */}
+        <ChartCard
+          title="Prediction Errors"
+          description="Difference between predicted and actual values for each data point. Values near zero indicate accurate predictions."
+          className="lg:col-span-3"
+        >
+          <ChartContainer config={errorChartConfig} className="h-[200px] w-full">
+            <LineChart data={errorData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+              <defs>
+                <linearGradient id="errorGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgb(96, 123, 244)" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="rgb(96, 123, 244)" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
+              <XAxis
+                dataKey="index"
+                stroke="rgb(237, 242, 247)"
+                tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Sample", position: "insideBottom", offset: -5, fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+              />
+              <YAxis
+                stroke="rgb(237, 242, 247)"
+                tick={{ fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Error", angle: -90, position: "insideLeft", fill: "rgb(237, 242, 247)", fontSize: 11, fontFamily: "var(--font-space-grotesk)" }}
+              />
+              <Tooltip content={<CustomChartTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="error"
+                stroke="rgb(96, 123, 244)"
+                strokeWidth={2}
+                dot={{ fill: "rgb(96, 123, 244)", r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </ChartCard>
+
+        {/* Training Parameters - 40% (2 columns) */}
+        <ChartCard
+          title="Training Configuration"
+          description="Parameters used during model training"
+          className="lg:col-span-2"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-2 bg-woodsmoke-900/30 border border-portage-500/20">
+              <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Model Type</span>
+              <span className="text-portage-200 text-sm font-space-grotesk">{selectedModel}</span>
+            </div>
+            {trainingConfig?.targetVariable && (
+              <div className="flex items-center justify-between p-2 bg-woodsmoke-900/30 border border-portage-500/20">
+                <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Target Variable</span>
+                <span className="text-portage-200 text-sm font-space-grotesk">{trainingConfig.targetVariable}</span>
+              </div>
+            )}
+            {trainingConfig?.predictors && (
+              <div className="flex items-center justify-between p-2 bg-woodsmoke-900/30 border border-portage-500/20">
+                <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Predictors</span>
+                <span className="text-portage-200 text-sm font-space-grotesk">{trainingConfig.predictors.length}</span>
+              </div>
+            )}
+            {trainingConfig?.handleOutliers !== undefined && (
+              <div className="flex items-center justify-between p-2 bg-woodsmoke-900/30 border border-portage-500/20">
+                <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Data Cleaning</span>
+                <span className="text-portage-200 text-sm font-space-grotesk">{trainingConfig.handleOutliers ? "Enabled" : "Disabled"}</span>
+              </div>
+            )}
+          </div>
+        </ChartCard>
       </div>
     </div>
   );

@@ -44,15 +44,18 @@ const ModelStepView = ({ modelId }: ModelStepViewProps) => {
   const getViewTitle = () => {
     switch (currentView) {
       case "preview":
-        return { subtitle: "Let's begin with", title: "Data previsualization" };
+        return { stepNumber: "01", subtitle: "Let's begin with", title: "Data previsualization" };
+      case "train":
       case "selection":
-        return { subtitle: "Now we proceed to", title: "Variable Selection" };
+        return { stepNumber: "02", subtitle: "Now we proceed to", title: "Variable Selection" };
       case "results":
-        return { subtitle: "Finally, let's review", title: "Model Results" };
+        return { stepNumber: "03", subtitle: "Finally, let's review", title: "Model Results" };
+      default:
+        return { stepNumber: "01", subtitle: "Let's begin with", title: "Data previsualization" };
     }
   };
 
-  const { subtitle, title } = getViewTitle();
+  const { stepNumber, subtitle, title } = getViewTitle();
 
   // Render content based on current view
   const renderContent = () => {
@@ -71,8 +74,11 @@ const ModelStepView = ({ modelId }: ModelStepViewProps) => {
     <div className="h-full overflow-y-auto hextech-scroll pr-2">
       <div className="w-full h-fit flex flex-col lg:flex-row justify-between lg:items-center gap-3 lg:gap-0">
         <div id="TitleContainer" className="flex-1">
-          <h4 className="font-tanker text-woodsmoke-300">{subtitle}</h4>
-          <h1 className="font-tanker text-2xl text-woodsmoke-50">
+          <div className="flex items-center gap-3">
+            <span className="text-portage-400 font-tanker text-3xl md:text-4xl opacity-60">{stepNumber}</span>
+            <h4 className="font-tanker text-woodsmoke-300">{subtitle}</h4>
+          </div>
+          <h1 className="font-tanker text-2xl text-woodsmoke-50 ml-[calc(3rem+0.75rem)]">
             {title}
           </h1>
 

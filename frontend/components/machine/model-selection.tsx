@@ -1,46 +1,18 @@
 // components/machine/model-selection.tsx
 "use client";
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { recommendTask } from "@/lib/api";
 import type { ModelInfo } from "@/lib/types";
 
 interface ModelSelectionProps {
-  targetVariable: string;
-  predictors: string[];
+  models: ModelInfo[];
   selectedModel: string | null;
   onModelSelect: (modelId: string) => void;
 }
 
 export const ModelSelection = ({
-  targetVariable,
-  predictors,
+  models,
   selectedModel,
   onModelSelect,
 }: ModelSelectionProps) => {
-  const [showModels, setShowModels] = useState(false);
-  const [models, setModels] = useState<ModelInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleViewRecommendedModels = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Get the recommended models (features already selected in outlier analysis)
-      const recommendedData = await recommendTask();
-
-      setModels(recommendedData.available_models);
-      setShowModels(true);
-    } catch (err) {
-      console.error("Error fetching recommended models:", err);
-      setError(err instanceof Error ? err.message : "Failed to load models");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
@@ -53,115 +25,87 @@ export const ModelSelection = ({
         </div>
 
         <p className="text-woodsmoke-100 font-space-grotesk text-base leading-relaxed">
-          View AI-recommended models based on your data characteristics. Each model is optimized for specific prediction tasks.
+          Choose from AI-recommended models based on your data characteristics. Each model is optimized for specific prediction tasks.
         </p>
       </div>
 
-      {!showModels ? (
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={handleViewRecommendedModels}
-            disabled={isLoading}
-            className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm transition-all duration-300 hover:border-portage-400/40 group disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {/* Hextech glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
-
-            <div className="relative px-5 py-3 flex items-center justify-center gap-2">
-              {isLoading && <Loader2 className="w-4 h-4 animate-spin text-portage-400" />}
-              <span className="text-portage-300 font-space-grotesk text-xs sm:text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors">
-                {isLoading ? "Loading Models..." : "View Recommended Models"}
-              </span>
-            </div>
-          </button>
-
-          {error && (
-            <p className="text-red-400 font-space-grotesk text-xs text-center">
-              {error}
-            </p>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Mobile: Dropdown Select */}
-          <div className="block md:hidden">
-            <select
-              value={selectedModel || ""}
-              onChange={(e) => onModelSelect(e.target.value)}
-              className="w-full px-4 py-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 text-portage-200 font-space-grotesk text-sm focus:border-portage-400/40 focus:ring-1 focus:ring-portage-500/50 focus:outline-none transition-colors rounded-md"
+      {/* Mobile: Dropdown Select */}
+      <div className="block md:hidden">
+        <select
+          value={selectedModel || ""}
+          onChange={(e) => onModelSelect(e.target.value)}
+          className="w-full px-4 py-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 text-portage-200 font-space-grotesk text-sm focus:border-portage-400/40 focus:ring-1 focus:ring-portage-500/50 focus:outline-none transition-colors rounded-md"
+        >
+          <option value="" disabled className="bg-woodsmoke-950 text-portage-400">
+            Select a model...
+          </option>
+          {models.map((model) => (
+            <option
+              key={model.model_type}
+              value={model.model_type}
+              className="bg-woodsmoke-950 text-portage-200"
             >
-              <option value="" disabled className="bg-woodsmoke-950 text-portage-400">
-                Select a model...
-              </option>
-              {models.map((model) => (
-                <option
-                  key={model.model_type}
-                  value={model.model_type}
-                  className="bg-woodsmoke-950 text-portage-200"
-                >
-                  {model.name}
-                </option>
-              ))}
-            </select>
+              {model.name}
+            </option>
+          ))}
+        </select>
 
-            {/* Selected model description on mobile */}
-            {selectedModel && (
-              <div className="mt-3 p-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20">
-                <p className="text-portage-400/70 font-space-grotesk text-xs leading-relaxed">
-                  {models.find(m => m.model_type === selectedModel)?.description}
-                </p>
+        {/* Selected model description on mobile */}
+        {selectedModel && (
+          <div className="mt-3 p-3 bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20">
+            <p className="text-portage-400/70 font-space-grotesk text-xs leading-relaxed">
+              {models.find(m => m.model_type === selectedModel)?.description}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: Grid of Cards */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {models.map((model) => (
+        <button
+          key={model.model_type}
+          onClick={() => onModelSelect(model.model_type)}
+          className="relative group text-left"
+        >
+          {/* Hextech corners */}
+          <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+          <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+          <div className={`relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border transition-all duration-300 ${
+            selectedModel === model.model_type
+              ? "border-portage-400/60 brightness-110"
+              : "border-portage-500/20 group-hover:border-portage-400/40"
+          }`}>
+            {/* Hextech glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+            {/* Energy Wave Animation - only on selected model */}
+            {selectedModel === model.model_type && (
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-portage-400/30 to-transparent animate-energy-wave" />
               </div>
             )}
+
+            {/* Selected indicator bar */}
+            {selectedModel === model.model_type && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-portage-400" />
+            )}
+
+            <div className="relative p-3 sm:p-4">
+              <h4 className="text-portage-200 font-space-grotesk font-medium text-sm sm:text-base mb-1">
+                {model.name}
+              </h4>
+              <p className="text-portage-400/70 font-space-grotesk text-xs leading-relaxed">
+                {model.description}
+              </p>
+            </div>
           </div>
-
-          {/* Desktop: Grid of Cards */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {models.map((model) => (
-            <button
-              key={model.model_type}
-              onClick={() => onModelSelect(model.model_type)}
-              className="relative group text-left"
-            >
-              {/* Hextech corners */}
-              <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-              <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-              <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
-
-              <div className={`relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border transition-all duration-300 ${
-                selectedModel === model.model_type
-                  ? "border-portage-400/60 brightness-110"
-                  : "border-portage-500/20 group-hover:border-portage-400/40"
-              }`}>
-                {/* Hextech glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-                {/* Energy Wave Animation - only on selected model */}
-                {selectedModel === model.model_type && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-portage-400/30 to-transparent animate-energy-wave" />
-                  </div>
-                )}
-
-                {/* Selected indicator bar */}
-                {selectedModel === model.model_type && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-portage-400" />
-                )}
-
-                <div className="relative p-3 sm:p-4">
-                  <h4 className="text-portage-200 font-space-grotesk font-medium text-sm sm:text-base mb-1">
-                    {model.name}
-                  </h4>
-                  <p className="text-portage-400/70 font-space-grotesk text-xs leading-relaxed">
-                    {model.description}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
-          </div>
-        </>
-      )}
+        </button>
+      ))}
+      </div>
 
       <style jsx>{`
         @keyframes energy-wave {

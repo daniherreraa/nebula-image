@@ -108,11 +108,15 @@ const VariableSelection = () => {
         n_neighbors: nNeighbors,
       });
 
-      // Step 3: Get recommendations (after outlier analysis)
+      // Step 3: Automatically get recommendations (after outlier analysis)
       const recommendations = await recommendTask();
       setRecommendedModels(recommendations);
 
       setHasAnalyzedOutliers(true);
+
+      toast.success("Analysis complete!", {
+        description: "Model recommendations are ready",
+      });
 
     } catch (error: unknown) {
       console.error("Outlier analysis error:", error);
@@ -425,16 +429,15 @@ const VariableSelection = () => {
       {hasAnalyzedOutliers && recommendedModels && (
         <div ref={modelsSectionRef}>
           <ModelSelection
-            targetVariable={targetVariable}
-            predictors={predictors}
+            models={recommendedModels.available_models}
             selectedModel={selectedModel}
             onModelSelect={handleModelSelect}
           />
         </div>
       )}
 
-      {/* Training Section - Only show if model is selected */}
-      {selectedModel && hasAnalyzedOutliers && (
+      {/* Training Section - Only show if model is selected AND outliers analyzed */}
+      {selectedModel && hasAnalyzedOutliers && recommendedModels && (
         <div ref={trainingSectionRef}>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
