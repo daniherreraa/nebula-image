@@ -7,6 +7,7 @@ import { ScatterChart, Scatter, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tool
 import { useModel } from "@/app/context";
 import { getClientApiUrl } from "@/lib/config";
 import { CustomChartTooltip } from "@/components/machine/custom-chart-tooltip";
+import { toast } from "sonner";
 
 // Mock data - será reemplazado con datos reales del modelo
 const mockPredictionsData = [
@@ -195,8 +196,9 @@ const Results = () => {
 
     } catch (error) {
       console.error('Error downloading model:', error);
-      // Optionally show an error message to the user
-      alert(error instanceof Error ? error.message : 'Failed to download model');
+      toast.error('Failed to download model', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
     } finally {
       setIsDownloading(false);
     }

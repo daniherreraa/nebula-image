@@ -12,6 +12,7 @@ import { TrainingLoadingScreen } from "@/components/machine/training-loading-scr
 import { selectFeatures, encodeCategorical, analyzeOutliers, recommendTask, prepareData, trainModel } from "@/lib/api";
 import { saveModel } from "@/lib/api/models";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
 
 const VariableSelection = () => {
   const {
@@ -115,7 +116,7 @@ const VariableSelection = () => {
 
     } catch (error: unknown) {
       console.error("Outlier analysis error:", error);
-      alert(error instanceof Error ? error.message : "Error during outlier analysis");
+      toast.error(error instanceof Error ? error.message : "Error during outlier analysis");
     } finally {
       setIsAnalyzingOutliers(false);
     }
@@ -193,6 +194,9 @@ const VariableSelection = () => {
         // Navigate to results immediately BEFORE marking as completed
         // This prevents the brief flash of the selection view
         setCurrentView("results");
+        toast.success("Training completed!", {
+          description: "View your model results now",
+        });
 
         // Mark as completed after navigation starts
         setHasCompletedTraining(true);
@@ -254,8 +258,14 @@ const VariableSelection = () => {
           setModelId(savedModel.id);
 
           console.log("✅ Model saved to database:", savedModel.id);
+          toast.success("Model saved successfully!", {
+            description: `Model ID: ${savedModel.id}`,
+          });
         } catch (saveError) {
           console.error("❌ Error saving model to database:", saveError);
+          toast.error("Failed to save model", {
+            description: saveError instanceof Error ? saveError.message : "Unknown error occurred",
+          });
           // Don't fail the entire training process if save fails
         } finally {
           setIsSavingModel(false);

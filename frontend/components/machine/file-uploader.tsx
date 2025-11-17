@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { useModel } from "@/app/context";
 import { getClientApiUrl } from "@/lib/config";
+import { toast } from "sonner";
 
 const FileUploader = () => {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -72,7 +73,9 @@ const FileUploader = () => {
       
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Error uploading file. Please try again.");
+      toast.error("Error uploading file", {
+        description: "Please try again with a valid CSV file",
+      });
     } finally {
       setUploading(false);
       setIsLoading(false);

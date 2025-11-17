@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import VersionLogger from "@/components/version-logger";
+import { Toaster } from "sonner";
 
 const fontTanker = localFont({
   src: "./assets/fonts/Tanker-Regular.woff2",
@@ -31,6 +32,17 @@ export default function RootLayout({
       >
         <VersionLogger />
         {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'rgb(27, 28, 34)',
+              border: '1px solid rgba(137, 166, 251, 0.2)',
+              color: 'rgb(220, 222, 241)',
+              fontFamily: 'var(--font-space-grotesk)',
+            },
+          }}
+        />
       </body>
     </html>
   );
