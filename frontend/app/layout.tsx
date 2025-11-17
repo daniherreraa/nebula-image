@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import VersionLogger from "@/components/version-logger";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/app/context/theme-context";
 
 const fontTanker = localFont({
   src: "./assets/fonts/Tanker-Regular.woff2",
@@ -30,20 +31,22 @@ export default function RootLayout({
       <body
         className={`${spaceGotestk.variable} ${fontTanker.variable} antialiased`}
       >
-        <VersionLogger />
-        {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: 'rgb(27, 28, 34)',
-              border: '1px solid rgba(137, 166, 251, 0.2)',
-              color: 'rgb(250, 250, 250)',
-              fontFamily: 'var(--font-space-grotesk)',
-            },
-            descriptionClassName: 'text-woodsmoke-50',
-          }}
-        />
+        <ThemeProvider>
+          <VersionLogger />
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                color: 'var(--card-foreground)',
+                fontFamily: 'var(--font-space-grotesk)',
+              },
+              className: 'font-space-grotesk',
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

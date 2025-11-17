@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { LogOut } from "lucide-react";
+import { LogOut, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/app/context/theme-context";
 
 interface UserSession {
   user: {
@@ -15,6 +16,7 @@ interface UserSession {
 }
 
 const UserAvatarClient = () => {
+  const { theme, toggleTheme } = useTheme();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -128,6 +130,39 @@ const UserAvatarClient = () => {
 
             {/* Divider */}
             <div className="h-px bg-gradient-to-r from-transparent via-portage-500/30 to-transparent mb-3" />
+
+            {/* Theme toggle button */}
+            <button
+              onClick={toggleTheme}
+              type="button"
+              className="relative group w-full text-left transition-all duration-300 mb-2"
+            >
+              {/* Hextech corners */}
+              <div className="absolute -top-1 -left-1 w-2 h-2 border-l border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+              <div className="absolute -top-1 -right-1 w-2 h-2 border-r border-t border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+              <div className="absolute -bottom-1 -left-1 w-2 h-2 border-l border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 border-r border-b border-portage-500/40 group-hover:border-portage-400/80 transition-colors duration-300" />
+
+              <div className="relative px-3 py-2 bg-woodsmoke-900/50 border border-portage-500/20 group-hover:border-portage-400/40 transition-all">
+                <div className="absolute inset-0 bg-gradient-to-br from-portage-500/0 via-portage-400/5 to-portage-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {theme === "dark" ? (
+                      <Sun className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                    ) : (
+                      <Moon className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                    )}
+                    <span className="text-portage-300 font-space-grotesk text-sm group-hover:text-portage-200 transition-colors">
+                      {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                    </span>
+                  </div>
+                  <span className="text-portage-400/60 font-space-grotesk text-xs">
+                    {theme === "dark" ? "☀️" : "🌙"}
+                  </span>
+                </div>
+              </div>
+            </button>
 
             {/* Logout button */}
             <button
