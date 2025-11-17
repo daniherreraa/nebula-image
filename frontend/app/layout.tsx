@@ -38,10 +38,10 @@ export default function RootLayout({
             style: {
               background: 'rgb(27, 28, 34)',
               border: '1px solid rgba(137, 166, 251, 0.2)',
-              color: 'rgb(220, 222, 241)',
+              color: 'rgb(250, 250, 250)',
               fontFamily: 'var(--font-space-grotesk)',
             },
-            descriptionClassName: 'text-woodsmoke-100',
+            descriptionClassName: 'text-woodsmoke-50',
           }}
         />
       </body>

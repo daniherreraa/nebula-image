@@ -74,7 +74,7 @@ const ModelStepView = ({ modelId }: ModelStepViewProps) => {
     <div className="h-full overflow-y-auto hextech-scroll pr-2">
       <div className="w-full h-fit flex flex-col lg:flex-row justify-between lg:items-center gap-3 lg:gap-0">
         <div id="TitleContainer" className="flex-1">
-          <div className="flex items-start gap-4">
+          <div className="flex items-center gap-4">
             <span className="text-portage-400 font-tanker text-3xl md:text-4xl opacity-60 min-w-[3rem] text-center">{stepNumber}</span>
             <div className="flex flex-col">
               <h4 className="font-tanker text-woodsmoke-300">{subtitle}</h4>
