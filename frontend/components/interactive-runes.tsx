@@ -19,6 +19,7 @@ export function InteractiveRunes() {
   const currentView = modelContext?.currentView ?? "preview";
   const hasCompletedTraining = modelContext?.hasCompletedTraining ?? false;
   const isAnalyzingOutliers = modelContext?.isAnalyzingOutliers ?? false;
+  const hasError = modelContext?.hasError ?? false;
 
   const [flash, setFlash] = useState(0);
   const [pulseIndex, setPulseIndex] = useState(0); // For sequential pulse effect
@@ -213,6 +214,18 @@ export function InteractiveRunes() {
 
   // Color transition durante training y results
   const getRuneColor = () => {
+    // If there's an error, show carnation colors
+    if (hasError) {
+      const brightness = 1.8;
+      const saturation = 1.8;
+      const baseGlow = 16;
+
+      return {
+        filter: `brightness(${brightness}) saturate(${saturation}) hue-rotate(10deg) drop-shadow(0 0 ${baseGlow}px rgba(239, 100, 97, 0.8)) drop-shadow(0 0 ${baseGlow * 1.5}px rgba(245, 145, 143, 0.5))`,
+        transition: "filter 0.8s ease-out",
+      };
+    }
+
     // If training completed, always keep illuminated state
     if (hasCompletedTraining) {
       const brightness = 1.8;
@@ -322,8 +335,8 @@ export function InteractiveRunes() {
 
       <style jsx>{`
         .rune-glow {
-          filter: drop-shadow(0 0 2px rgba(96, 123, 244, 0.8))
-            drop-shadow(0 0 4px rgba(96, 123, 244, 0.5));
+          filter: drop-shadow(0 0 2px rgba(239, 100, 97, 0.8))
+            drop-shadow(0 0 4px rgba(239, 100, 97, 0.5));
         }
 
         .rune-glow :global(img) {
@@ -336,8 +349,8 @@ export function InteractiveRunes() {
           inset: -10%;
           background: radial-gradient(
             circle,
-            rgba(96, 123, 244, 0.08) 0%,
-            rgba(96, 123, 244, 0.04) 40%,
+            rgba(239, 100, 97, 0.08) 0%,
+            rgba(239, 100, 97, 0.04) 40%,
             transparent 70%
           );
           z-index: -1;

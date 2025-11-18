@@ -195,6 +195,8 @@ export interface ModelContextType {
   setIsLoadedModel: (loaded: boolean) => void;
   isSavingModel: boolean;
   setIsSavingModel: (saving: boolean) => void;
+  hasError: boolean;
+  setHasError: (hasError: boolean) => void;
 }
 
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
@@ -219,6 +221,7 @@ export function ModelProvider({ children }: { children: ReactNode }) {
   const [isAnalyzingOutliers, setIsAnalyzingOutliers] = useState(false);
   const [isLoadedModel, setIsLoadedModel] = useState(false);
   const [isSavingModel, setIsSavingModel] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const clearDataset = () => {
     setModelId(null);
@@ -234,6 +237,7 @@ export function ModelProvider({ children }: { children: ReactNode }) {
     setCorrelationData(null);
     setIsLoadedModel(false);
     setIsSavingModel(false);
+    setHasError(false);
   };
 
   return (
@@ -270,6 +274,8 @@ export function ModelProvider({ children }: { children: ReactNode }) {
         setIsLoadedModel,
         isSavingModel,
         setIsSavingModel,
+        hasError,
+        setHasError,
       }}
     >
       {children}

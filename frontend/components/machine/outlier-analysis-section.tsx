@@ -101,23 +101,23 @@ export const OutlierAnalysisSection = ({
                     onValueChange={(value) => onIqrKChange(parseFloat(value))}
                     disabled={isAnalyzing}
                   >
-                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-portage-200 font-space-grotesk text-sm hover:border-portage-400/40 focus:ring-portage-500/50 focus:ring-offset-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                      <SelectValue />
+                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-50 font-space-grotesk text-sm hover:border-portage-400/40 focus:ring-portage-500/50 focus:ring-offset-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                      <SelectValue className="text-woodsmoke-50" />
                     </SelectTrigger>
                     <SelectContent className="bg-woodsmoke-950 border-portage-500/30">
-                      <SelectItem value="1.0" className="text-portage-200 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20">
+                      <SelectItem value="1.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
                         1.0 (Aggressive)
                       </SelectItem>
-                      <SelectItem value="1.5" className="text-portage-200 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20">
+                      <SelectItem value="1.5" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
                         1.5 (Standard)
                       </SelectItem>
-                      <SelectItem value="2.0" className="text-portage-200 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20">
+                      <SelectItem value="2.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
                         2.0 (Conservative)
                       </SelectItem>
-                      <SelectItem value="2.5" className="text-portage-200 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20">
+                      <SelectItem value="2.5" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
                         2.5 (Very Conservative)
                       </SelectItem>
-                      <SelectItem value="3.0" className="text-portage-200 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20">
+                      <SelectItem value="3.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
                         3.0 (Minimal)
                       </SelectItem>
                     </SelectContent>

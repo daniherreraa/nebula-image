@@ -82,12 +82,22 @@ const FileUploader = () => {
     }
   }, [router, setModelId, setDataset, setIsLoading]);
 
-  const { getRootProps, getInputProps, open } = useDropzone({
+  const { getRootProps, getInputProps, open, fileRejections } = useDropzone({
     onDrop,
     multiple: false,
     accept: { "text/csv": [".csv"] },
+    maxSize: 10 * 1024 * 1024, // 10MB limit
     noClick: true,
     noKeyboard: true,
+    onDropRejected: (rejectedFiles) => {
+      rejectedFiles.forEach(rejection => {
+        if (rejection.errors.some(e => e.code === 'file-too-large')) {
+          toast.error("File too large", {
+            description: "Maximum file size is 10MB",
+          });
+        }
+      });
+    },
   });
 
   return (

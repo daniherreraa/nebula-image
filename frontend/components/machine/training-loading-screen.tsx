@@ -84,9 +84,6 @@ export const TrainingLoadingScreen = ({
       {/* Progress message */}
       {hasError ? (
         <div className="flex flex-col items-center gap-6 max-w-xl px-4">
-          {/* Error Icon */}
-          <AlertCircle className="w-12 h-12 sm:w-16 sm:h-16 text-carnation-400 animate-pulse" />
-
           {/* Error Message */}
           <div className="text-carnation-300 font-space-grotesk text-sm sm:text-base md:text-lg tracking-wide text-center">
             {currentMessage}
@@ -94,7 +91,7 @@ export const TrainingLoadingScreen = ({
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-2">
-            {/* Try Again Button */}
+            {/* Select Another Model Button */}
             {onRetryTraining && (
               <button
                 onClick={onRetryTraining}
@@ -113,7 +110,7 @@ export const TrainingLoadingScreen = ({
                 <div className="relative px-6 py-3 flex items-center justify-center gap-3">
                   <RefreshCw className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
                   <span className="text-portage-300 font-space-grotesk text-sm uppercase tracking-[0.15em] group-hover:text-portage-200 transition-colors whitespace-nowrap">
-                    Try Again
+                    Select Another Model
                   </span>
                 </div>
               </button>

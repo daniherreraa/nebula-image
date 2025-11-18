@@ -153,7 +153,7 @@ const VariableSelection = () => {
       setTrainingProgress(30);
 
       // Step 2: Prepare data (split train/test)
-      setCurrentMessage("Preparando datos (train/test split)...");
+      setCurrentMessage("Preparing data (train/test split)...");
       setTrainingProgress(40);
 
       await prepareData();
@@ -161,7 +161,7 @@ const VariableSelection = () => {
       setTrainingProgress(60);
 
       // Step 3: Train model
-      setCurrentMessage("Entrenando modelo...");
+      setCurrentMessage("Training model...");
       setTrainingProgress(70);
 
       const trainingResult = await trainModel({
@@ -171,7 +171,7 @@ const VariableSelection = () => {
       // Log the result for debugging/graphics
       console.log("Training result:", trainingResult);
 
-      setCurrentMessage("Procesando resultados...");
+      setCurrentMessage("Processing results...");
       setTrainingProgress(90);
 
       // Step 4: Save results from API response
