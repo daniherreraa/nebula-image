@@ -70,23 +70,23 @@ export const OutlierAnalysisSection = ({
                 {wantsDataCleaning ? "Yes" : "No"}
               </span>
               <div className="relative">
-                <div className={`absolute inset-0 rounded-full transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-400/20' : 'bg-woodsmoke-800/50'}`} />
+                <div className={`absolute inset-0 rounded-sm transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-500/30' : 'bg-woodsmoke-800/50'}`} />
                 <button
                   type="button"
                   role="switch"
                   aria-checked={wantsDataCleaning}
                   onClick={() => handleEnableDataCleaning(!wantsDataCleaning)}
                   disabled={isAnalyzing}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-portage-400/50 focus:ring-offset-2 focus:ring-offset-woodsmoke-950 ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`relative inline-flex h-6 w-11 items-center transition-all duration-300 focus:outline-none ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <span className="sr-only">Enable Data Cleaning</span>
                   <span
-                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-portage-400 shadow-lg transition-transform duration-300 ease-in-out flex items-center justify-center`}
+                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} h-4 w-4 transform bg-portage-400 transition-transform duration-300 ease-in-out flex items-center justify-center border border-woodsmoke-800/50`}
                   >
                     {wantsDataCleaning ? (
-                      <span className="h-1 w-1 rounded-full bg-woodsmoke-900" />
+                      <span className="h-1 w-1 bg-woodsmoke-900" />
                     ) : (
-                      <span className="h-1 w-1 rounded-full bg-woodsmoke-400" />
+                      <span className="h-1 w-1 bg-woodsmoke-400" />
                     )}
                   </span>
                 </button>

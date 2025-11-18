@@ -3,8 +3,8 @@
 import { useState, useMemo } from "react";
 import { Download, Loader2, Info, Plus } from "lucide-react";
 import { ChartContainer } from "@/components/ui/chart";
+import { useModel } from "@/app/context/ModelContext";
 import { ScatterChart, Scatter, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { useModel } from "@/app/context";
 import { getClientApiUrl } from "@/lib/config";
 import { CustomChartTooltip } from "@/components/machine/custom-chart-tooltip";
 import { toast } from "sonner";
@@ -200,23 +200,27 @@ const Results = () => {
     }
   };
 
+  const { clearDataset } = useModel();
+
   const handleCreateNewModel = () => {
-    // Navigate to the root path
-    window.location.href = '/';
+    // Clear all model state before navigating
+    clearDataset();
+    // Navigate to the app home page
+    window.location.href = '/app';
   };
 
   const scatterChartConfig = {
     predicted: {
       label: "Predicted",
       color: "hsl(var(--color-portage-500))",
-    },
+    }
   };
 
   const barChartConfig = {
     importance: {
       label: "Importance",
       color: "hsl(var(--color-portage-500))",
-    },
+    }
   };
 
   const errorChartConfig = {
@@ -399,15 +403,15 @@ const Results = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
               <XAxis
                 dataKey="actual"
-                stroke="hsl(var(--color-woodsmoke-100))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="hsl(var(--color-woodsmoke-50))"
+                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <YAxis
                 dataKey="predicted"
-                stroke="hsl(var(--color-woodsmoke-100))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="hsl(var(--color-woodsmoke-50))"
+                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Scatter data={predictionsData} fill="rgb(96, 123, 244)" />
@@ -438,14 +442,14 @@ const Results = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
                 <XAxis
                   dataKey="name"
-                  stroke="hsl(var(--color-woodsmoke-100))"
-                  tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="hsl(var(--color-woodsmoke-50))"
+                  tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <YAxis
-                  stroke="hsl(var(--color-woodsmoke-100))"
-                  tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  stroke="hsl(var(--color-woodsmoke-50))"
+                  tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
                 />
                 <Tooltip content={<CustomChartTooltip />} />
                 <Bar
@@ -493,14 +497,14 @@ const Results = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(96, 123, 244)" opacity={0.1} />
               <XAxis
                 dataKey="index"
-                stroke="hsl(var(--color-woodsmoke-100))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Sample", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="hsl(var(--color-woodsmoke-50))"
+                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)' }}
+                label={{ value: 'Sample', fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)', dy: 10 }}
               />
               <YAxis
-                stroke="hsl(var(--color-woodsmoke-100))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Error", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-100))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                stroke="hsl(var(--color-woodsmoke-50))"
+                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)' }}
+                label={{ value: 'Error', angle: -90, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)', dx: -10 }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Line
@@ -526,10 +530,10 @@ const Results = () => {
               <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Model Type</span>
               <span className="text-portage-200 text-sm font-space-grotesk">{selectedModel}</span>
             </div>
-            {trainingConfig?.targetVariable && (
+            {trainingConfig?.outcomeVariable && (
               <div className="flex items-center justify-between p-2 bg-woodsmoke-900/30 border border-portage-500/20">
                 <span className="text-portage-400/70 text-xs font-space-grotesk uppercase tracking-wider">Target Variable</span>
-                <span className="text-portage-200 text-sm font-space-grotesk">{trainingConfig.targetVariable}</span>
+                <span className="text-portage-200 text-sm font-space-grotesk">{trainingConfig.outcomeVariable}</span>
               </div>
             )}
             {trainingConfig?.predictors && (
