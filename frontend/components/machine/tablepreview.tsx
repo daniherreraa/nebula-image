@@ -32,11 +32,11 @@ const TablePreview = memo(function TablePreview({column_names, preview_data, onC
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm w-full h-fit flex flex-col">
+    <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm w-full h-full flex flex-col">
       {/* Instructional text */}
       {!selectedColumn && (
         <div className="px-4 pt-3 pb-2 border-b border-portage-500/10">
-          <p className="text-xs text-portage-300 font-space-grotesk flex items-center gap-2">
+          <p className="text-sm text-portage-300 font-space-grotesk flex items-center gap-2">
             <span className="inline-flex h-2 w-2 rounded-full bg-portage-400 animate-pulse"></span>
             <span>Click on any column header to view detailed statistics</span>
           </p>
@@ -46,7 +46,7 @@ const TablePreview = memo(function TablePreview({column_names, preview_data, onC
       <div className="absolute inset-0 bg-gradient-to-r from-portage-500/5 via-portage-400/10 to-portage-500/5 pointer-events-none" />
       <div className="absolute top-0 left-0 right-0 h-[0.0625rem] bg-gradient-to-r from-transparent via-portage-400/40 to-transparent" />
 
-      <div className="relative overflow-auto hextech-scroll">
+      <div className="relative overflow-x-auto overflow-y-auto hextech-scroll flex-1">
         <Table>
           <TableHeader className="sticky top-0 z-10">
             <TableRow className="border-b border-portage-500/20 hover:bg-transparent">

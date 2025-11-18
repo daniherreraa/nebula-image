@@ -69,11 +69,28 @@ export const OutlierAnalysisSection = ({
               <span className="text-portage-400/60 font-space-grotesk text-xs">
                 {wantsDataCleaning ? "Yes" : "No"}
               </span>
-              <Switch
-                checked={wantsDataCleaning}
-                onCheckedChange={handleEnableDataCleaning}
-                disabled={isAnalyzing}
-              />
+              <div className="relative">
+                <div className={`absolute inset-0 rounded-full transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-400/20' : 'bg-woodsmoke-800/50'}`} />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={wantsDataCleaning}
+                  onClick={() => handleEnableDataCleaning(!wantsDataCleaning)}
+                  disabled={isAnalyzing}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-portage-400/50 focus:ring-offset-2 focus:ring-offset-woodsmoke-950 ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <span className="sr-only">Enable Data Cleaning</span>
+                  <span
+                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-portage-400 shadow-lg transition-transform duration-300 ease-in-out flex items-center justify-center`}
+                  >
+                    {wantsDataCleaning ? (
+                      <span className="h-1 w-1 rounded-full bg-woodsmoke-900" />
+                    ) : (
+                      <span className="h-1 w-1 rounded-full bg-woodsmoke-400" />
+                    )}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -98,28 +115,24 @@ export const OutlierAnalysisSection = ({
                   </p>
                   <Select
                     value={iqrK.toString()}
-                    onValueChange={(value) => onIqrKChange(parseFloat(value))}
-                    disabled={isAnalyzing}
+                    onValueChange={(value) => onIqrKChange(Number(value))}
+                    disabled={!wantsDataCleaning || isAnalyzing}
                   >
-                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-50 font-space-grotesk text-sm hover:border-portage-400/40 focus:ring-portage-500/50 focus:ring-offset-0 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                      <SelectValue className="text-woodsmoke-50" />
+                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-100 hover:border-portage-400/60 transition-colors">
+                      <SelectValue placeholder="Select IQR multiplier">
+                        {iqrK.toFixed(1)}
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="bg-woodsmoke-950 border-portage-500/30">
-                      <SelectItem value="1.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
-                        1.0 (Aggressive)
-                      </SelectItem>
-                      <SelectItem value="1.5" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
-                        1.5 (Standard)
-                      </SelectItem>
-                      <SelectItem value="2.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
-                        2.0 (Conservative)
-                      </SelectItem>
-                      <SelectItem value="2.5" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
-                        2.5 (Very Conservative)
-                      </SelectItem>
-                      <SelectItem value="3.0" className="text-woodsmoke-50 font-space-grotesk hover:bg-portage-500/20 focus:bg-portage-500/20 focus:text-woodsmoke-50">
-                        3.0 (Minimal)
-                      </SelectItem>
+                    <SelectContent className="bg-woodsmoke-900 border-portage-500/30">
+                      {[1.0, 1.5, 2.0, 2.5, 3.0].map((value) => (
+                        <SelectItem 
+                          key={value} 
+                          value={value.toString()}
+                          className="hover:bg-woodsmoke-800/50 focus:bg-woodsmoke-800/70 text-woodsmoke-100"
+                        >
+                          {value.toFixed(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

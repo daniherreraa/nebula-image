@@ -130,6 +130,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Dark Theme (Hextech) */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -173,38 +174,67 @@
 }
 
 .light {
-  /* Piltover/Arcane light theme - warm golds, bronze, cream tones */
-  --background: #fdfaf5;
-  --foreground: #2c2416;
-  --card: #f8f4ed;
-  --card-foreground: #2c2416;
+  /* Light theme - clean and simple */
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #f8f9fa;
+  --card-foreground: #1a1a1a;
   --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #1a1a1a;
+  --destructive: #ef4444;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #6366f1;
+  --chart-3: #8b5cf6;
+  --chart-4: #ec4899;
+  --chart-5: #f59e0b;
+}
+
+/* Piltover by Day Theme - Whites and Golds */
+.piltover-day {
+  --background: #fffcf5;
+  --foreground: #2c2416;
+  --card: #fffaf0;
+  --card-foreground: #2c2416;
+  --popover: #fffcf5;
   --popover-foreground: #2c2416;
-  --primary: #b2590b;
-  --primary-foreground: #fdfaf5;
-  --secondary: #e7d4b8;
+  --primary: #d4a017; /* Gold */
+  --primary-foreground: #2c2416;
+  --secondary: #f5e6c8; /* Light gold */
   --secondary-foreground: #2c2416;
-  --muted: #ede5d8;
+  --muted: #f0e6d2;
   --muted-foreground: #6d5d42;
-  --accent: #d77e08;
-  --accent-foreground: #fdfaf5;
-  --destructive: #d3322f;
-  --border: #d4c4a8;
-  --input: #e7d4b8;
-  --ring: #b2590b;
-  --chart-1: #4253e9;
-  --chart-2: #607bf4;
-  --chart-3: #f3a712;
-  --chart-4: #d77e08;
-  --chart-5: #b2590b;
-  --sidebar: #f8f4ed;
+  --accent: #e8d9b5;
+  --accent-foreground: #2c2416;
+  --destructive: #dc2626;
+  --border: #e0d5bc;
+  --input: #e0d5bc;
+  --ring: #d4a017; /* Gold */
+  --chart-1: #d4a017; /* Gold */
+  --chart-2: #b78b1f; /* Darker gold */
+  --chart-3: #9a7d24; /* Even darker gold */
+  --chart-4: #7d6829; /* Bronze */
+  --chart-5: #63552d; /* Dark bronze */
+  
+  /* Sidebar specific colors */
+  --sidebar: #fffaf0;
   --sidebar-foreground: #2c2416;
-  --sidebar-primary: #4253e9;
-  --sidebar-primary-foreground: #fdfaf5;
-  --sidebar-accent: #e7d4b8;
+  --sidebar-primary: #d4a017;
+  --sidebar-primary-foreground: #2c2416;
+  --sidebar-accent: #f5e6c8;
   --sidebar-accent-foreground: #2c2416;
-  --sidebar-border: #d4c4a8;
-  --sidebar-ring: #b2590b;
+  --sidebar-border: #e0d5bc;
+  --sidebar-ring: #d4a017;
 }
 
 @layer base {

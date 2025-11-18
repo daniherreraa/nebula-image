@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { LogOut, Sun, Moon } from "lucide-react";
+import { LogOut, Sun, Moon, Sparkles } from "lucide-react";
 import { useTheme } from "@/app/context/theme-context";
 
 interface UserSession {
@@ -149,17 +149,21 @@ const UserAvatarClient = () => {
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {theme === "dark" ? (
-                      <Sun className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                      <Sun className="w-4 h-4 text-portage-400" />
+                    ) : theme === "light" ? (
+                      <Moon className="w-4 h-4 text-portage-400" />
                     ) : (
-                      <Moon className="w-4 h-4 text-portage-400 group-hover:text-portage-300 transition-colors" />
+                      <Sparkles className="w-4 h-4 text-amber-400" />
                     )}
-                    <span className="text-portage-300 font-space-grotesk text-sm group-hover:text-portage-200 transition-colors">
-                      {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                    <span className="text-portage-300 font-space-grotesk text-sm">
+                      {theme === "dark" ? "Light Mode" : theme === "light" ? "Piltover Day" : "Dark Mode"}
                     </span>
                   </div>
-                  <span className="text-portage-400/60 font-space-grotesk text-xs">
-                    {theme === "dark" ? "☀️" : "🌙"}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full ${theme === 'dark' ? 'bg-portage-400' : 'bg-woodsmoke-600'}`} />
+                    <div className={`w-2 h-2 rounded-full ${theme === 'light' ? 'bg-portage-400' : 'bg-woodsmoke-600'}`} />
+                    <div className={`w-2 h-2 rounded-full ${theme === 'piltover-day' ? 'bg-amber-400' : 'bg-woodsmoke-600'}`} />
+                  </div>
                 </div>
               </div>
             </button>

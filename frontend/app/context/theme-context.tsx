@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "dark" | "light" | "piltover-day";
 
 interface ThemeContextType {
   theme: Theme;
@@ -21,15 +21,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = localStorage.getItem("nebula-theme") as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.toggle("light", savedTheme === "light");
+      updateThemeClass(savedTheme);
     }
   }, []);
 
+  const updateThemeClass = (theme: Theme) => {
+    // Remove all theme classes
+    document.documentElement.classList.remove("light", "piltover-day");
+    
+    // Add the appropriate class
+    if (theme === "light") {
+      document.documentElement.classList.add("light");
+    } else if (theme === "piltover-day") {
+      document.documentElement.classList.add("piltover-day");
+    }
+  };
+
   const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
+    const themeOrder: Theme[] = ["dark", "light", "piltover-day"];
+    const currentIndex = themeOrder.indexOf(theme);
+    const newTheme = themeOrder[(currentIndex + 1) % themeOrder.length];
+    
     setTheme(newTheme);
     localStorage.setItem("nebula-theme", newTheme);
-    document.documentElement.classList.toggle("light", newTheme === "light");
+    updateThemeClass(newTheme);
   };
 
   // Prevent flash of unstyled content
