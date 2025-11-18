@@ -69,20 +69,34 @@ export const OutlierAnalysisSection = ({
               <span className="text-portage-400/60 font-space-grotesk text-xs">
                 {wantsDataCleaning ? "Yes" : "No"}
               </span>
-              <div className="relative">
-                <div className={`absolute inset-0 transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-500/30' : 'bg-woodsmoke-800/50'}`} style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }} />
+              <div className="relative flex items-center" style={{ height: '24px' }}>
+                <div 
+                  className={`absolute inset-0 transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-500/30' : 'bg-woodsmoke-800/50'}`} 
+                  style={{ 
+                    clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
+                    height: '24px',
+                    top: '0',
+                    bottom: '0',
+                    margin: 'auto 0'
+                  }} 
+                />
                 <button
                   type="button"
                   role="switch"
                   aria-checked={wantsDataCleaning}
                   onClick={() => handleEnableDataCleaning(!wantsDataCleaning)}
                   disabled={isAnalyzing}
-                  className={`relative inline-flex h-6 w-12 items-center transition-all duration-300 focus:outline-none ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
+                  className={`relative inline-flex items-center transition-all duration-300 focus:outline-none ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  style={{ 
+                    clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))',
+                    height: '24px',
+                    width: '48px',
+                    margin: '0'
+                  }}
                 >
                   <span className="sr-only">Enable Data Cleaning</span>
                   <span
-                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} h-4 w-4 transform bg-woodsmoke-800 border border-portage-400/50 transition-transform duration-300 ease-in-out flex items-center justify-center`}
+                    className={`absolute top-1/2 -translate-y-1/2 ${wantsDataCleaning ? 'left-6' : 'left-1'} h-4 w-4 transform bg-woodsmoke-800 border border-portage-400/50 transition-all duration-300 ease-in-out flex items-center justify-center`}
                     style={{
                       boxShadow: '0 0 4px rgba(139, 92, 246, 0.5)',
                       clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))'

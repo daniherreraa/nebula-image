@@ -404,14 +404,46 @@ const Results = () => {
               <XAxis
                 dataKey="actual"
                 stroke="hsl(var(--color-woodsmoke-50))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Actual", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                color="hsl(var(--color-woodsmoke-50))"
+                tick={{ 
+                  fill: "hsl(var(--color-woodsmoke-50))", 
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 14, 
+                  fontFamily: "var(--font-space-grotesk)" 
+                }}
+                label={{ 
+                  value: "Actual", 
+                  position: "insideBottom", 
+                  offset: -5, 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 14, 
+                  fontFamily: "var(--font-space-grotesk)" 
+                }}
               />
               <YAxis
                 dataKey="predicted"
                 stroke="hsl(var(--color-woodsmoke-50))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                label={{ value: "Predicted", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                color="hsl(var(--color-woodsmoke-50))"
+                tick={{ 
+                  fill: "hsl(var(--color-woodsmoke-50))", 
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 14, 
+                  fontFamily: "var(--font-space-grotesk)" 
+                }}
+                label={{ 
+                  value: "Predicted", 
+                  angle: -90, 
+                  position: "insideLeft", 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 14, 
+                  fontFamily: "var(--font-space-grotesk)" 
+                }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Scatter data={predictionsData} fill="rgb(96, 123, 244)" />
@@ -443,13 +475,45 @@ const Results = () => {
                 <XAxis
                   dataKey="name"
                   stroke="hsl(var(--color-woodsmoke-50))"
-                  tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Feature", position: "insideBottom", offset: -5, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  color="hsl(var(--color-woodsmoke-50))"
+                  tick={{ 
+                    fill: "hsl(var(--color-woodsmoke-50))",
+                    color: "hsl(var(--color-woodsmoke-50))",
+                    stroke: "hsl(var(--color-woodsmoke-50))",
+                    fontSize: 14, 
+                    fontFamily: "var(--font-space-grotesk)" 
+                  }}
+                  label={{ 
+                    value: "Feature", 
+                    position: "insideBottom", 
+                    offset: -5, 
+                    fill: "hsl(var(--color-woodsmoke-50))",
+                    color: "hsl(var(--color-woodsmoke-50))",
+                    stroke: "hsl(var(--color-woodsmoke-50))",
+                    fontSize: 14, 
+                    fontFamily: "var(--font-space-grotesk)" 
+                  }}
                 />
                 <YAxis
                   stroke="hsl(var(--color-woodsmoke-50))"
-                  tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
-                  label={{ value: "Importance", angle: -90, position: "insideLeft", fill: "hsl(var(--color-woodsmoke-50))", fontSize: 14, fontFamily: "var(--font-space-grotesk)" }}
+                  color="hsl(var(--color-woodsmoke-50))"
+                  tick={{ 
+                    fill: "hsl(var(--color-woodsmoke-50))",
+                    color: "hsl(var(--color-woodsmoke-50))",
+                    stroke: "hsl(var(--color-woodsmoke-50))",
+                    fontSize: 14, 
+                    fontFamily: "var(--font-space-grotesk)" 
+                  }}
+                  label={{ 
+                    value: "Importance", 
+                    angle: -90, 
+                    position: "insideLeft", 
+                    fill: "hsl(var(--color-woodsmoke-50))",
+                    color: "hsl(var(--color-woodsmoke-50))",
+                    stroke: "hsl(var(--color-woodsmoke-50))",
+                    fontSize: 14, 
+                    fontFamily: "var(--font-space-grotesk)" 
+                  }}
                 />
                 <Tooltip content={<CustomChartTooltip />} />
                 <Bar
@@ -498,13 +562,44 @@ const Results = () => {
               <XAxis
                 dataKey="index"
                 stroke="hsl(var(--color-woodsmoke-50))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)' }}
-                label={{ value: 'Sample', fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)', dy: 10 }}
+                color="hsl(var(--color-woodsmoke-50))"
+                tick={{ 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 12, 
+                  fontFamily: 'var(--font-space-grotesk)' 
+                }}
+                label={{ 
+                  value: 'Sample', 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 12, 
+                  fontFamily: 'var(--font-space-grotesk)', 
+                  dy: 10 
+                }}
               />
               <YAxis
                 stroke="hsl(var(--color-woodsmoke-50))"
-                tick={{ fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)' }}
-                label={{ value: 'Error', angle: -90, fill: "hsl(var(--color-woodsmoke-50))", fontSize: 12, fontFamily: 'var(--font-space-grotesk)', dx: -10 }}
+                color="hsl(var(--color-woodsmoke-50))"
+                tick={{ 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 12, 
+                  fontFamily: 'var(--font-space-grotesk)' 
+                }}
+                label={{ 
+                  value: 'Error', 
+                  angle: -90, 
+                  fill: "hsl(var(--color-woodsmoke-50))",
+                  color: "hsl(var(--color-woodsmoke-50))",
+                  stroke: "hsl(var(--color-woodsmoke-50))",
+                  fontSize: 12, 
+                  fontFamily: 'var(--font-space-grotesk)', 
+                  dx: -10 
+                }}
               />
               <Tooltip content={<CustomChartTooltip />} />
               <Line
