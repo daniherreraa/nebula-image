@@ -338,7 +338,7 @@ const ModelReport = ({ modelData }: ModelReportProps) => {
       </div>
 
       {/* Collapsible Correlations */}
-      {modelData.correlation_data && (
+      {modelData.correlation_data && modelData.correlation_data.columns && modelData.correlation_data.correlations && (
         <div className="relative overflow-hidden bg-gradient-to-r from-woodsmoke-950/60 via-woodsmoke-950/90 to-woodsmoke-950/60 border border-portage-500/20 backdrop-blur-sm">
           <button
             onClick={() => setIsCorrelationsOpen(!isCorrelationsOpen)}
