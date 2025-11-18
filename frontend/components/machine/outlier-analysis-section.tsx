@@ -70,24 +70,25 @@ export const OutlierAnalysisSection = ({
                 {wantsDataCleaning ? "Yes" : "No"}
               </span>
               <div className="relative">
-                <div className={`absolute inset-0 rounded-sm transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-500/30' : 'bg-woodsmoke-800/50'}`} />
+                <div className={`absolute inset-0 transition-all duration-300 ${wantsDataCleaning ? 'bg-portage-500/30' : 'bg-woodsmoke-800/50'}`} style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }} />
                 <button
                   type="button"
                   role="switch"
                   aria-checked={wantsDataCleaning}
                   onClick={() => handleEnableDataCleaning(!wantsDataCleaning)}
                   disabled={isAnalyzing}
-                  className={`relative inline-flex h-6 w-11 items-center transition-all duration-300 focus:outline-none ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`relative inline-flex h-6 w-12 items-center transition-all duration-300 focus:outline-none ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  style={{ clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))' }}
                 >
                   <span className="sr-only">Enable Data Cleaning</span>
                   <span
-                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} h-4 w-4 transform bg-portage-400 transition-transform duration-300 ease-in-out flex items-center justify-center border border-woodsmoke-800/50`}
+                    className={`${wantsDataCleaning ? 'translate-x-6' : 'translate-x-1'} h-4 w-4 transform bg-woodsmoke-800 border border-portage-400/50 transition-transform duration-300 ease-in-out flex items-center justify-center`}
+                    style={{
+                      boxShadow: '0 0 4px rgba(139, 92, 246, 0.5)',
+                      clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))'
+                    }}
                   >
-                    {wantsDataCleaning ? (
-                      <span className="h-1 w-1 bg-woodsmoke-900" />
-                    ) : (
-                      <span className="h-1 w-1 bg-woodsmoke-400" />
-                    )}
+                    <span className={`h-1 w-1 ${wantsDataCleaning ? 'bg-portage-400' : 'bg-woodsmoke-400'}`} />
                   </span>
                 </button>
               </div>
@@ -148,15 +149,28 @@ export const OutlierAnalysisSection = ({
                   <p className="text-woodsmoke-100 text-xs font-space-grotesk leading-relaxed mb-1">
                     Number of nearest neighbors for imputation. Lower values (1-5) use closest data, higher values (10-20) use more neighbors for stability.
                   </p>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={nNeighbors}
-                    onChange={(e) => onNNeighborsChange(parseInt(e.target.value) || 5)}
-                    disabled={isAnalyzing}
-                    className="w-full px-3 py-2 bg-woodsmoke-900/50 border border-portage-500/30 text-portage-200 font-space-grotesk text-sm hover:border-portage-400/40 focus:border-portage-500/50 focus:ring-1 focus:ring-portage-500/50 focus:outline-none transition-colors rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
+                  <Select
+                    value={nNeighbors.toString()}
+                    onValueChange={(value) => onNNeighborsChange(Number(value))}
+                    disabled={isAnalyzing || !wantsDataCleaning}
+                  >
+                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-100 hover:border-portage-400/60 hover:text-woodsmoke-50 transition-colors font-space-grotesk">
+                      <SelectValue placeholder="Select neighbors" className="font-space-grotesk">
+                        {nNeighbors}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-woodsmoke-900 border-portage-500/30 font-space-grotesk max-h-60">
+                      {Array.from({ length: 20 }, (_, i) => i + 1).map((value) => (
+                        <SelectItem 
+                          key={value} 
+                          value={value.toString()}
+                          className="hover:bg-woodsmoke-800/50 focus:bg-woodsmoke-800/70 text-woodsmoke-100 hover:text-woodsmoke-50 focus:text-woodsmoke-50 font-space-grotesk"
+                        >
+                          {value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
