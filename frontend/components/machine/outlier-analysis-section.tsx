@@ -118,17 +118,17 @@ export const OutlierAnalysisSection = ({
                     onValueChange={(value) => onIqrKChange(Number(value))}
                     disabled={!wantsDataCleaning || isAnalyzing}
                   >
-                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-100 hover:border-portage-400/60 transition-colors">
-                      <SelectValue placeholder="Select IQR multiplier">
+                    <SelectTrigger className="w-full bg-woodsmoke-900/50 border-portage-500/30 text-woodsmoke-100 hover:border-portage-400/60 hover:text-woodsmoke-50 transition-colors font-space-grotesk">
+                      <SelectValue placeholder="Select IQR multiplier" className="font-space-grotesk">
                         {iqrK.toFixed(1)}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="bg-woodsmoke-900 border-portage-500/30">
+                    <SelectContent className="bg-woodsmoke-900 border-portage-500/30 font-space-grotesk">
                       {[1.0, 1.5, 2.0, 2.5, 3.0].map((value) => (
                         <SelectItem 
                           key={value} 
                           value={value.toString()}
-                          className="hover:bg-woodsmoke-800/50 focus:bg-woodsmoke-800/70 text-woodsmoke-100"
+                          className="hover:bg-woodsmoke-800/50 focus:bg-woodsmoke-800/70 text-woodsmoke-100 hover:text-woodsmoke-50 focus:text-woodsmoke-50 font-space-grotesk"
                         >
                           {value.toFixed(1)}
                         </SelectItem>
