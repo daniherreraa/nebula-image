@@ -84,7 +84,7 @@ async def health_check():
         "status": "healthy",
         "service": "Nebula ML API",
         "version": "1.0.0",
-        "git_commit": "d701a6c",  # Updated with each deployment - includes multiclass classification fix
+        "git_commit": "604111c",  # Updated with each deployment - includes multiclass classification fix
         "cors_enabled": True,
         "allowed_origins": origins
     })
